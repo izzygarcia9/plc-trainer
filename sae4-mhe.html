@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-4: MHE Conveyor Fault/Jam</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-4: MHE Conveyor &mdash; Fault &amp; Jam Logic</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> MHE Setup: Sequential start of two conveyors with 4-second delay. Create motor fault condition and jam condition for Conveyor 47313. Both conveyors in same E-stop zone. CS310 is reset button for clearing all faults.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#9881; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="scene-box" style="height:80px">
+                    <div class="zone"><span class="zone-label">47312</span><div class="pe-dot" id="c1-dot"></div></div>
+                    <div class="zone"><span class="zone-label">PE</span><div class="pe-dot" id="pe-dot"></div></div>
+                    <div class="zone"><span class="zone-label">47313</span><div class="pe-dot" id="c2-dot"></div></div>
+                    <div class="conv-line"></div>
+                </div>
+                <div class="equipment" style="flex-wrap:wrap">
+                    <div class="equip-box" id="c1-box"><div class="equip-icon">&#9881;</div><div class="equip-label">CONV 47312</div><div class="equip-status" id="c1-status">OFF</div></div>
+                    <div class="equip-box" id="c2-box"><div class="equip-icon">&#9881;</div><div class="equip-label">CONV 47313</div><div class="equip-status" id="c2-status">OFF</div></div>
+                    <div class="equip-box" id="estop-box"><div class="equip-icon">&#128721;</div><div class="equip-label">E-STOP</div><div class="equip-status" id="estop-status">OK</div></div>
+                    <div class="equip-box" id="fault-box"><div class="equip-icon">&#9888;</div><div class="equip-label">MOTOR FAULT</div><div class="equip-status" id="fault-status">OK</div></div>
+                    <div class="equip-box" id="jam-box"><div class="equip-icon">&#128680;</div><div class="equip-label">JAM</div><div class="equip-status" id="jam-status">OK</div></div>
+                </div>
+                <div class="timer-bars">
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#f39c12">SEQ DLY</span><div class="tbar-track"><div class="tbar-fill" id="seq-bar" style="width:0%;background:#f39c12"></div></div><span class="tbar-time" id="seq-time">0/4s</span></div>
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#e74c3c">JAM TMR</span><div class="tbar-track"><div class="tbar-fill" id="jam-bar" style="width:0%;background:#e74c3c"></div></div><span class="tbar-time" id="jam-time">0/3s</span></div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="pressStart()">START</button>
+                    <button class="plc-btn rbtn" onclick="pressStop()">STOP</button>
+                    <button class="plc-btn ybtn" onclick="togglePE()">Toggle PE</button>
+                    <button class="plc-btn rbtn" onclick="triggerEstop()">E-STOP</button>
+                    <button class="plc-btn ybtn" onclick="triggerMotorFault()">Motor Fault</button>
+                    <button class="plc-btn bbtn" onclick="pressReset()">CS310 RESET</button>
+                </div>
+                <div class="cycle-info"><span>State: <strong id="state-display">IDLE</strong></span></div>
+                <div class="time-scale-control"><label>1 sec = <strong id="scale-display">1</strong> scan(s)</label><input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;"></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">500</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="500" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae4-app.js"></script>
+</body>
+</html>

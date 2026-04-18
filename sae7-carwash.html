@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-7: Automatic Car Wash</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-7: Automatic Car Wash &mdash; 4-Phase Sequential</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Automatic Car Washing: 4 phases, each starts when position sensor triggers, 50 sec per phase. Conveyor stops at each phase start, resumes after completion. If operator presses stop during any phase, process stops and resumes from same phase when start is pressed.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128663; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="wash-visual">
+                    <div class="wash-phase" id="wp1"><div class="wp-icon">&#128167;</div><div>PRE-SOAK</div></div>
+                    <div class="wash-phase" id="wp2"><div class="wp-icon">&#129532;</div><div>SOAP</div></div>
+                    <div class="wash-phase" id="wp3"><div class="wp-icon">&#128167;</div><div>RINSE</div></div>
+                    <div class="wash-phase" id="wp4"><div class="wp-icon">&#128168;</div><div>DRY</div></div>
+                    <div class="wash-phase exit-phase" id="wp-exit"><div class="wp-icon">&#9989;</div><div>EXIT</div></div>
+                    <div class="car-icon" id="car-icon">&#128663;</div>
+                    <div class="conv-track-wash"></div>
+                </div>
+                <div class="timer-bars">
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#3498db">PHASE</span><div class="tbar-track"><div class="tbar-fill" id="phase-bar" style="width:0%;background:#3498db"></div></div><span class="tbar-time" id="phase-time">0/50s</span></div>
+                </div>
+                <div class="cycle-info"><span>Phase: <strong id="phase-val">0</strong>/4</span><span>State: <strong id="state-display">IDLE</strong></span><span>Conv: <strong id="conv-state">OFF</strong></span></div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="pressStart()">START</button>
+                    <button class="plc-btn rbtn" onclick="pressStop()">STOP (Pause)</button>
+                </div>
+                <div class="sim-hint" style="font-size:.65rem;color:#555;text-align:center">Position sensors auto-trigger as conveyor moves car. Stop pauses mid-phase, Start resumes.</div>
+                <div class="time-scale-control"><label>1 sec = <strong id="scale-display">1</strong> scan(s)</label><input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;"></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">500</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="500" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae7-app.js"></script>
+    <style>
+    .wash-visual{display:flex;align-items:flex-end;justify-content:center;gap:6px;width:100%;height:100px;background:#0d0d1a;border:1px solid #2a2a4a;border-radius:8px;position:relative;padding:8px 12px 24px}
+    .wash-phase{text-align:center;padding:6px 10px;border:2px solid #333;border-radius:6px;font-size:.6rem;font-weight:bold;color:#555;min-width:55px;transition:all .3s;z-index:2}
+    .wash-phase.active{border-color:#3498db;color:#3498db;background:rgba(52,152,219,.15)}
+    .wash-phase.done{border-color:#2ecc71;color:#2ecc71;background:rgba(46,204,113,.08)}
+    .exit-phase.active{border-color:#f1c40f;color:#f1c40f;background:rgba(241,196,15,.1)}
+    .wp-icon{font-size:1.2rem;margin-bottom:2px}
+    .car-icon{position:absolute;bottom:6px;left:5%;font-size:1.5rem;transition:left .5s;z-index:3}
+    .conv-track-wash{position:absolute;bottom:16px;left:0;right:0;height:3px;background:#444;border-radius:2px}
+    </style>
+</body>
+</html>

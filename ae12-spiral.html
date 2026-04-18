@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - AE-12: Spiral Package Counter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae12-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">AE-12: Spiral Package Counter &mdash; Jam Detection</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Spiral Package Counter with Jam Detection: PE1 at top increments counter, PE2 at bottom decrements. If counter reaches 10 or more, set an OTE bit to indicate a jam. A Reset pushbutton clears the jam signal and resets the counter.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128230; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="spiral-visual">
+                    <div class="spiral-top"><span class="pe-label">PE1 (entry)</span><div class="pe-dot" id="pe1-dot"></div></div>
+                    <div class="spiral-chute"><div class="pkg-count-display" id="pkg-display">0</div><div class="spiral-path"></div></div>
+                    <div class="spiral-bottom"><div class="pe-dot" id="pe2-dot"></div><span class="pe-label">PE2 (exit)</span></div>
+                </div>
+                <div class="equipment">
+                    <div class="equip-box" id="jam-box"><div class="equip-icon">&#128680;</div><div class="equip-label">JAM</div><div class="equip-status" id="jam-status">OK</div></div>
+                    <div class="equip-box"><div class="equip-icon">&#128230;</div><div class="equip-label">IN CHUTE</div><div class="equip-status" id="count-status">0</div></div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn" style="background:#1a3a1a;color:#2ecc71;border-color:#27ae60" onclick="triggerPE1()">PE1 &#8595; Package In</button>
+                    <button class="plc-btn" style="background:#1a2a3a;color:#3498db;border-color:#2980b9" onclick="triggerPE2()">PE2 &#8595; Package Out</button>
+                    <button class="plc-btn" style="background:#3a1a1a;color:#e74c3c;border-color:#c0392b" onclick="pressReset()">RESET</button>
+                </div>
+                <div class="sim-section">
+                    <label>Auto-simulate: packages enter faster than they exit</label>
+                    <button class="plc-btn" style="background:#1a1a2e;color:#f39c12;border-color:#d4ac0d" onclick="startAutoJam()">Simulate Jam Buildup</button>
+                </div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span></div>
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table"><thead><tr><th>Address</th><th>Tag</th><th>Type</th><th>Value</th><th>Description</th></tr></thead><tbody id="register-body"></tbody></table>
+            <div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div>
+        </section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="ae12-app.js"></script>
+</body>
+</html>

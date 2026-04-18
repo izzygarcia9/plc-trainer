@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - AE-10: EV Charging Cost</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae10-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">AE-10: EV Charging Cost Calculator</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Create a ladder logic program to simulate the cost of charging an electric vehicle: Start button begins a timer tracking charging duration. Cost is calculated by multiplying elapsed time by $0.25 per second. Stop button pauses timer and holds current cost. Start again resumes from where it left off.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128267; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="ev-display">
+                    <div class="ev-car">&#128664;</div>
+                    <div class="charge-indicator" id="charge-ind"></div>
+                    <div class="ev-battery" id="ev-battery"><div class="battery-fill" id="battery-fill"></div><span id="battery-pct">0%</span></div>
+                </div>
+                <div class="cost-display">
+                    <div class="cost-label">TOTAL COST</div>
+                    <div class="cost-value" id="cost-val">$0.00</div>
+                    <div class="cost-sub">Elapsed: <span id="elapsed-val">0</span>s &times; $0.25/sec</div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn start-btn" id="start-btn" onclick="pressStart()">START / RESUME</button>
+                    <button class="plc-btn stop-btn" onclick="pressStop()">STOP / PAUSE</button>
+                    <button class="plc-btn" style="background:#1a1a2e;color:#f39c12;border-color:#d4ac0d" onclick="resetAll()">RESET</button>
+                </div>
+                <div class="cycle-info">
+                    <span>State: <strong id="state-display">IDLE</strong></span>
+                    <span>Rate: $0.25/sec</span>
+                </div>
+                <div class="time-scale-control">
+                    <label>1 second = <strong id="scale-display">1</strong> scan(s)</label>
+                    <input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;">
+                </div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">1000</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="1000" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table"><thead><tr><th>Address</th><th>Tag</th><th>Type</th><th>Value</th><th>Description</th></tr></thead><tbody id="register-body"></tbody></table>
+            <div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div>
+        </section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="ae10-app.js"></script>
+</body>
+</html>

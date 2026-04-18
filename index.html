@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Logic Trainer - Scenario Hub</title>
+    <style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+header {
+    background: #16213e;
+    padding: 24px 32px;
+    text-align: center;
+    border-bottom: 2px solid #0f3460;
+}
+header h1 { font-size: 1.8rem; color: #00d4ff; margin-bottom: 4px; }
+header p { color: #7ec8e3; font-size: 0.9rem; }
+
+.filters {
+    display: flex; gap: 8px; justify-content: center;
+    padding: 16px; flex-wrap: wrap;
+}
+.filter-btn {
+    padding: 6px 16px; border-radius: 20px; border: 1px solid #333;
+    background: #1a1d29; color: #888; cursor: pointer; font-size: 0.8rem;
+    transition: all 0.2s;
+}
+.filter-btn:hover { border-color: #00d4ff; color: #00d4ff; }
+.filter-btn.active { background: #0f3460; border-color: #00d4ff; color: #00d4ff; }
+
+.stats-bar {
+    display: flex; gap: 24px; justify-content: center; padding: 0 16px 16px;
+    font-size: 0.8rem; color: #666;
+}
+.stats-bar strong { color: #00d4ff; }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 12px;
+    padding: 0 24px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.card {
+    background: #1a1d29;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.2s;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+}
+.card:hover { border-color: #0f3460; transform: translateY(-2px); }
+.card.available { cursor: pointer; }
+.card.available:hover { border-color: #00d4ff; }
+
+.card-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.card-num {
+    background: #0f3460; color: #00d4ff; font-size: 0.7rem; font-weight: bold;
+    padding: 3px 8px; border-radius: 4px; min-width: 24px; text-align: center;
+}
+.card-level {
+    font-size: 0.65rem; font-weight: bold; padding: 2px 8px;
+    border-radius: 10px; letter-spacing: 1px;
+}
+.card-level.ae { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid #27ae60; }
+.card-level.sae { background: rgba(243,156,18,0.15); color: #f39c12; border: 1px solid #d4ac0d; }
+
+.card-status {
+    margin-left: auto; font-size: 0.65rem; padding: 2px 8px;
+    border-radius: 10px;
+}
+.card-status.built { background: rgba(46,204,113,0.15); color: #2ecc71; }
+.card-status.coming { background: rgba(136,136,136,0.15); color: #666; }
+
+.card-title {
+    font-size: 0.95rem; font-weight: 600; color: #ccc;
+    margin-bottom: 8px; line-height: 1.3;
+}
+
+.card-desc {
+    font-size: 0.75rem; color: #777; line-height: 1.5;
+    flex: 1; margin-bottom: 10px;
+    max-height: 80px; overflow: hidden;
+    position: relative;
+}
+.card-desc::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, #1a1d29);
+}
+
+.card-tags {
+    display: flex; gap: 4px; flex-wrap: wrap;
+}
+.tag {
+    font-size: 0.6rem; padding: 2px 6px; border-radius: 3px;
+    background: #12141e; color: #555; border: 1px solid #2a2d3a;
+}
+
+.card-footer {
+    display: flex; align-items: center; gap: 8px; margin-top: 10px;
+    padding-top: 10px; border-top: 1px solid #2a2d3a;
+}
+.launch-btn {
+    padding: 6px 16px; border-radius: 4px; border: 1px solid #00d4ff;
+    background: rgba(0,212,255,0.1); color: #00d4ff; font-size: 0.75rem;
+    cursor: pointer; font-weight: bold; text-decoration: none;
+    transition: all 0.2s;
+}
+.launch-btn:hover { background: #00d4ff; color: #0f1117; }
+.plcfiddle-link {
+    font-size: 0.65rem; color: #555; text-decoration: none;
+    margin-left: auto;
+}
+.plcfiddle-link:hover { color: #7ec8e3; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <p>AE / SAE Ladder Logic Training &amp; Assessment Platform</p>
+    </header>
+
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterCards('all')">All</button>
+        <button class="filter-btn" onclick="filterCards('ae')">AE</button>
+        <button class="filter-btn" onclick="filterCards('sae')">SAE</button>
+        <button class="filter-btn" onclick="filterCards('built')">Built</button>
+        <button class="filter-btn" onclick="filterCards('timers')">Timers</button>
+        <button class="filter-btn" onclick="filterCards('counters')">Counters</button>
+        <button class="filter-btn" onclick="filterCards('math')">Math/Compare</button>
+        <button class="filter-btn" onclick="filterCards('sequencer')">Sequencer</button>
+        <button class="filter-btn" onclick="filterCards('latch')">Latch/Seal-in</button>
+    </div>
+
+    <div class="stats-bar">
+        <span>Total: <strong id="total-count">0</strong></span>
+        <span>Built: <strong id="built-count">0</strong></span>
+        <span>AE: <strong id="ae-count">0</strong></span>
+        <span>SAE: <strong id="sae-count">0</strong></span>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+<script>
+const scenarios = [
+  // ─── AE Scenarios ───
+  { num:"AE-1", level:"ae", title:"One-Shot Toggle Latch",
+    desc:"Create a one-shot push button to latch ON a bulb when pressed once, and OFF when pressed again. Demonstrates rising edge detection and toggle logic.",
+    tags:["one-shot","latch","edge-detect"], status:"built", url:"oneshot.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/7bd0e082-9764-4bc6-9302-0033db3ba6f1" },
+
+  { num:"AE-2", level:"ae", title:"Compare 5 Variables — Find Highest",
+    desc:"When start is pressed, compare 5 random numerical variables and store the highest number in a variable called HIGHEST. Uses compare and move instructions.",
+    tags:["math","compare","move"], status:"built", url:"ae2-highest.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/8144a4d6-5a37-4ffc-aeb0-3e9cdaa1c90f" },
+
+  { num:"AE-3", level:"ae", title:"Material Age Clock (Days/Hours/Minutes)",
+    desc:"Track the age of material in tank A-15 in days, hours, and minutes. A15_CLK_STT starts/resets the clock, A15_CLK_STP stops and holds current time.",
+    tags:["timers","counters","math"], status:"built", url:"ae3-clock.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/1c3b72f3-1915-423d-ac88-4089b351f2a8" },
+
+  { num:"AE-4", level:"ae", title:"HVAC Heating / Cooling System",
+    desc:"Monitor room temp. Below 75 turn on heater, above 75 turn on AC. Each scan adds/subtracts 1 degree based on which is running. Only input is typing new room temp.",
+    tags:["compare","math","deadband"], status:"built", url:"hvac.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/93ee5194-3301-4779-bcd7-01dac870a874" },
+
+  { num:"AE-5", level:"ae", title:"Bottle Fill Conveyor",
+    desc:"Run a bottle fill conveyor. When bottle breaks sensor, stop conveyor and fill for 5 seconds, then continue. Inputs are start button and product present sensor.",
+    tags:["timers","latch","sequencer"], status:"built", url:"ae5-bottle.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/8bbe1fcf-c4aa-4091-8c57-05b01aebef0f" },
+
+  { num:"AE-6", level:"ae", title:"Dual Tank Priority Fill",
+    desc:"Two feeding tanks with high/low level switches. When both empty, Tank 1 has priority. Control Motor Valve A & B with priority logic.",
+    tags:["latch","compare","priority"], status:"built", url:"ae6-tanks.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/b544e3b1-a288-4275-bc1e-bb8297c64747" },
+
+  { num:"AE-7", level:"ae", title:"Shuttle Motor (PE1/PE2 Reciprocating)",
+    desc:"Motor runs forward until PE1 triggers, then reverses until PE2 triggers. Cycles indefinitely. Stop button halts immediately.",
+    tags:["latch","seal-in","interlock"], status:"built", url:"shuttle.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/4405da1c-2455-4e4f-9b9f-46e2bdab0f85" },
+
+  { num:"AE-9", level:"ae", title:"Traffic Light Sequencer",
+    desc:"Green for 30s, Yellow for 10s, Red for 20s, repeat continuously. Uses TON timer instructions.",
+    tags:["timers","sequencer"], status:"built", url:"traffic.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/fcfea063-284d-4ed6-8017-c4b2669aaa9d" },
+
+  { num:"AE-10", level:"ae", title:"EV Charging Cost Calculator",
+    desc:"Start button begins timer tracking charging duration. Cost = elapsed time x $0.25/sec. Stop pauses timer and holds cost. Start resumes from where it left off.",
+    tags:["timers","math","latch"], status:"built", url:"ae10-ev.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/54f961b7-33a9-48ba-b5b2-399b695da5ae" },
+
+  { num:"AE-12", level:"ae", title:"Spiral Package Counter with Jam Detection",
+    desc:"PE1 at top increments counter, PE2 at bottom decrements. If counter reaches 10+, set jam bit. Reset button clears jam and counter.",
+    tags:["counters","compare","latch"], status:"built", url:"ae12-spiral.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/fb7a9ee6-491e-4061-b8da-75f4ef6262f7" },
+
+  { num:"AE-13", level:"ae", title:"Dual Conveyor Energy-Saving Logic",
+    desc:"Conveyor 1 feeds into Conveyor 2. If Conv2 stopped and PE blocked, stop Conv1. If PE unblocked for 20s, both enter energy-saving mode.",
+    tags:["timers","interlock","latch"], status:"built", url:"ae13-dualconv.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/ae7f4fa1-2add-4fcd-9fc2-e49f1c915ddd" },
+
+  { num:"AE-14", level:"ae", title:"Gravel Dumper with Overdump Alarm",
+    desc:"Proximity sensor detects truck. 3s delay before dumping. Dump for 30s then stop. If dumper runs >30s, trigger overdump alarm.",
+    tags:["timers","latch","alarm"], status:"built", url:"gravel.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/32f0c119-b631-4d2d-9550-8f046c79f755" },
+
+  { num:"AE-15", level:"ae", title:"Conveyor Inspection with Reject Delay",
+    desc:"Photoeye detects package, size sensor flags oversized. 5s delay to reject station. Reject actuator fires for 1s. Handle continuous flow.",
+    tags:["timers","sequencer","one-shot"], status:"built", url:"ae15-inspect.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/a3e42960-14f5-4b6b-900a-b0cd14eb12cc" },
+
+  { num:"AE-16", level:"ae", title:"Pallet Counter with Conveyor Control",
+    desc:"Pallet sensor increments counter. At 3 pallets, conveyor stops. Clear button resets counter and resumes. Debounce pallet detection.",
+    tags:["counters","latch","one-shot"], status:"built", url:"ae16-pallet.html" },
+
+  { num:"AE-17", level:"ae", title:"Metal Detector Reject Arm",
+    desc:"Metal sensor triggers reject arm after 2s delay. Arm stays active for 1s then resets. System ready for next detection.",
+    tags:["timers","one-shot","sequencer"], status:"built", url:"ae17-metal.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/72deff84-3995-4267-8f71-4a0c04383153" },
+
+  { num:"AE-18", level:"ae", title:"Divisibility Check (FizzBuzz)",
+    desc:"Evaluate input: div by 3 only → 3, div by 5 only → 5, both → 15, neither → 0. Uses DIV/MUL/SUB for modulo. Precedence matters.",
+    tags:["math","compare"], status:"built", url:"divisibility.html",
+    fiddle:"https://www.plcfiddle.com/fiddles/e6a17473-5fa2-4330-beed-05b8c60869ea" },
+
+  // ─── SAE Scenarios ───
+  { num:"SAE-1", level:"sae", title:"Alternating Bulbs with Cycle Counter",
+    desc:"Bulb A ON 5s then OFF. After 3s, Bulb B ON 5s then OFF. Repeat for N cycles. Demonstrates sequential timer logic with counting.",
+    tags:["timers","counters","sequencer"], status:"built", url:"sae1-bulbs.html" },
+
+  { num:"SAE-2", level:"sae", title:"Motor CW/CCW Toggle with Cycle Limit",
+    desc:"First press runs motor CW, second press CCW, alternating. After N forward+backward cycles, start button has no effect until reset.",
+    tags:["one-shot","latch","counters","interlock"], status:"built", url:"sae2-motor.html" },
+
+  { num:"SAE-3", level:"sae", title:"Mining Conveyor Sequential Start/Stop",
+    desc:"Three conveyors (BC1, BC2, BC3) with feeder. Sequential start with time delays. Determine when to stop feeder. Efficient start/stop design.",
+    tags:["timers","sequencer","interlock"], status:"built", url:"sae3-mining.html" },
+
+  { num:"SAE-4", level:"sae", title:"MHE Conveyor with Fault & Jam Logic",
+    desc:"Sequential start of two conveyors with 4s delay. Motor fault and jam conditions for Conveyor 47313. E-stop zone, reset button CS310.",
+    tags:["timers","latch","alarm","interlock"], status:"built", url:"sae4-mhe.html" },
+
+  { num:"SAE-5", level:"sae", title:"Controller Handshake with Success Counter",
+    desc:"Start PB initiates handshake between two controllers. Count 'success' every 3s of continuous handshake. Stop when success reaches 10.",
+    tags:["timers","counters","compare","latch"], status:"built", url:"sae5-handshake.html" },
+
+  { num:"SAE-6", level:"sae", title:"MHE Motor Fault/Jam/Disconnect Alarm",
+    desc:"Motor disconnect, photo-eye, motor. Program fault conditions, jam condition, disconnect alarm with resets. Bonus: motor replacement alarm at 1000 hours.",
+    tags:["timers","counters","alarm","latch"], status:"built", url:"sae6-motorfault.html" },
+
+  { num:"SAE-7", level:"sae", title:"Automatic Car Wash (4-Phase Sequential)",
+    desc:"4 phases triggered by position sensors, 50s each. Conveyor stops at each phase, resumes after. Stop pauses mid-phase, start resumes.",
+    tags:["timers","sequencer","latch"], status:"built", url:"sae7-carwash.html" },
+
+  { num:"SAE-8", level:"sae", title:"Conveyor with Jam Detection & Reset Horn",
+    desc:"Start toggle runs motor. PE blocked declares jam in 3s. If jammed, PE clear + reset toggle unlatches jam in 5s. Horn during reset. Conveyor restarts.",
+    tags:["timers","latch","alarm","one-shot"], status:"built", url:"sae8-jamhorn.html" },
+
+  { num:"SAE-9", level:"sae", title:"Pump-Out Control with Float Monitoring",
+    desc:"System Start activates system. Pump starts when both floats active. Pump continues when high float drops. Stops only when low float drops. Stop deactivates all.",
+    tags:["latch","seal-in","interlock"], status:"built", url:"sae9-pump.html" },
+
+  { num:"SAE-11", level:"sae", title:"Weight-Based Sorting System",
+    desc:"Sort items by weight: Light (0-5kg), Medium (5-15kg), Heavy (15+kg). Dedicated outputs per range. Counters for each category plus total.",
+    tags:["compare","counters","math"], status:"built", url:"sae11-sorting.html" },
+
+  { num:"SAE-12", level:"sae", title:"Three-Floor Elevator Control",
+    desc:"Elevator serving 3 floors with call buttons and floor selection. Prioritize current direction. Door open/close timers. Safety features.",
+    tags:["timers","sequencer","compare","interlock"], status:"built", url:"sae12-elevator.html" },
+
+  { num:"SAE-13", level:"sae", title:"Automated Packaging Cycle (50 units)",
+    desc:"Fill 10s, seal 5s, transfer 3s. Repeat 50 times then stop. Counter tracks completed packages. Reset button restarts.",
+    tags:["timers","counters","sequencer"], status:"built", url:"sae13-packaging.html" },
+
+  { num:"SAE-14", level:"sae", title:"Sequential Water Tank Filling (3 Tanks)",
+    desc:"Fill Tank 1, then 2, then 3 in sequence. Stop each at high-level sensor. Stop system when all full. Manual override per tank.",
+    tags:["sequencer","latch","interlock"], status:"built", url:"sae14-watertanks.html" },
+
+  { num:"SAE-18", level:"sae", title:"Shuttle Dumper — 5 Locations with Pause",
+    desc:"Shuttle services 5 dump locations, 5s each. Start/Stop/Pause buttons. Pause holds current step/timer. Stop resets to Location 1.",
+    tags:["timers","counters","sequencer","latch"], status:"built", url:"sae18-shuttle5.html" },
+];
+
+// ─── Render ───
+function renderCards(filter) {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    let filtered = scenarios;
+    if (filter === 'ae') filtered = scenarios.filter(s => s.level === 'ae');
+    else if (filter === 'sae') filtered = scenarios.filter(s => s.level === 'sae');
+    else if (filter === 'built') filtered = scenarios.filter(s => s.status === 'built');
+    else if (filter !== 'all') filtered = scenarios.filter(s => s.tags.includes(filter));
+
+    for (const s of filtered) {
+        const card = document.createElement('div');
+        card.className = 'card' + (s.status === 'built' ? ' available' : '');
+        if (s.status === 'built' && s.url) {
+            card.onclick = () => window.location.href = s.url;
+        }
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="card-num">${s.num}</span>
+                <span class="card-level ${s.level}">${s.level.toUpperCase()}</span>
+                <span class="card-status ${s.status}">${s.status === 'built' ? '&#10003; Built' : 'Coming'}</span>
+            </div>
+            <div class="card-title">${s.title}</div>
+            <div class="card-desc">${s.desc}</div>
+            <div class="card-tags">${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+            <div class="card-footer">
+                ${s.status === 'built' ? `<a class="launch-btn" href="${s.url}">Launch</a>` : '<span style="font-size:0.7rem;color:#444">Coming soon</span>'}
+                ${s.fiddle ? `<a class="plcfiddle-link" href="${s.fiddle}" target="_blank" onclick="event.stopPropagation()">PLC Fiddle &#8599;</a>` : ''}
+            </div>
+        `;
+        grid.appendChild(card);
+    }
+
+    // Stats
+    document.getElementById('total-count').textContent = scenarios.length;
+    document.getElementById('built-count').textContent = scenarios.filter(s => s.status === 'built').length;
+    document.getElementById('ae-count').textContent = scenarios.filter(s => s.level === 'ae').length;
+    document.getElementById('sae-count').textContent = scenarios.filter(s => s.level === 'sae').length;
+}
+
+function filterCards(filter) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderCards(filter);
+}
+
+renderCards('all');
+</script>
+</body>
+</html>

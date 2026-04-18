@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - Traffic Light Control</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="traffic-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">Scenario: Traffic Light Sequencer (TON Timers)</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HVAC</a>
+            <a href="shuttle.html" class="nav-link">Shuttle</a>
+            <a href="divisibility.html" class="nav-link">Divisibility</a>
+            <a href="gravel.html" class="nav-link">Gravel</a>
+            <a href="oneshot.html" class="nav-link">One-Shot</a>
+        </div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Create a ladder logic program for a traffic light control system: Green light on for 30 seconds, then Yellow for 10 seconds, then Red for 20 seconds. After red, sequence repeats continuously starting with green.</div>
+
+    <main>
+        <!-- HMI Panel -->
+        <section id="hmi-panel" class="panel">
+            <h2>&#128678; HMI Panel</h2>
+            <div class="hmi-content">
+
+                <!-- Traffic Light Visual -->
+                <div class="traffic-light-housing">
+                    <div class="light-bulb red-bulb" id="red-bulb"></div>
+                    <div class="light-bulb yellow-bulb" id="yellow-bulb"></div>
+                    <div class="light-bulb green-bulb" id="green-bulb"></div>
+                    <div class="light-pole"></div>
+                </div>
+
+                <!-- Timer bars -->
+                <div class="timer-bars">
+                    <div class="timer-bar-row">
+                        <span class="tbar-label green-text">GREEN</span>
+                        <div class="tbar-track">
+                            <div class="tbar-fill green-fill" id="green-bar" style="width:0%"></div>
+                        </div>
+                        <span class="tbar-time" id="green-time">0 / 30s</span>
+                    </div>
+                    <div class="timer-bar-row">
+                        <span class="tbar-label yellow-text">YELLOW</span>
+                        <div class="tbar-track">
+                            <div class="tbar-fill yellow-fill" id="yellow-bar" style="width:0%"></div>
+                        </div>
+                        <span class="tbar-time" id="yellow-time">0 / 10s</span>
+                    </div>
+                    <div class="timer-bar-row">
+                        <span class="tbar-label red-text">RED</span>
+                        <div class="tbar-track">
+                            <div class="tbar-fill red-fill" id="red-bar" style="width:0%"></div>
+                        </div>
+                        <span class="tbar-time" id="red-time">0 / 20s</span>
+                    </div>
+                </div>
+
+                <!-- Cycle info -->
+                <div class="cycle-info">
+                    <span>State: <strong id="state-display">GREEN</strong></span>
+                    <span>Cycle #: <strong id="cycle-count">1</strong></span>
+                </div>
+
+                <!-- Time scale control -->
+                <div class="time-scale-control">
+                    <label>Time scale: 1 second = <strong id="scale-display">1</strong> scan(s)</label>
+                    <input type="range" id="time-scale" min="1" max="10" value="1" step="1"
+                           oninput="updateTimeScale(this.value)">
+                    <div class="scale-hint">Lower = faster cycle (1 scan/sec is real-time at scan speed)</div>
+                </div>
+
+                <!-- Scan Controls -->
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <button onclick="resetCycle()">&#8634; Reset</button>
+                    <div class="scan-info">
+                        <span>Scan #: <strong id="scan-count">0</strong></span>
+                        <span>Scan Time: <strong id="scan-time">1000</strong>ms</span>
+                    </div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="1000" step="50"
+                           oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+
+        <!-- Ladder Logic Panel -->
+        <section id="ladder-panel" class="panel">
+            <h2>&#128208; Ladder Logic</h2>
+            <div class="ladder-content" id="ladder-content"></div>
+        </section>
+
+        <!-- Register Table Panel -->
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Tag Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="register-body"></tbody>
+            </table>
+            <div class="scan-log">
+                <h3>Scan Log</h3>
+                <div id="scan-log" class="log-output"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="traffic-app.js"></script>
+</body>
+</html>

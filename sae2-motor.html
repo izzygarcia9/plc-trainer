@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-2: Motor CW/CCW Toggle</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+    <link rel="stylesheet" href="sae2-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-2: Motor CW/CCW Toggle &mdash; Cycle Limit</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Write a PLC program: If push button is pressed first time, motor runs clockwise. If pressed again, runs counter-clockwise, and so on. Once motor has run both forward and backward for N times, pressing start has no effect until reset button is pressed.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#9881; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="motor-visual">
+                    <div class="motor-circle" id="motor-circle"><div class="motor-arrow" id="motor-arrow"></div></div>
+                    <div class="motor-state" id="motor-state">STOPPED</div>
+                </div>
+                <div class="equipment">
+                    <div class="equip-box" id="cw-box"><div class="equip-icon">&#8635;</div><div class="equip-label">CW</div><div class="equip-status" id="cw-status">OFF</div></div>
+                    <div class="equip-box" id="ccw-box"><div class="equip-icon">&#8634;</div><div class="equip-label">CCW</div><div class="equip-status" id="ccw-status">OFF</div></div>
+                </div>
+                <div class="cycle-display"><span>Cycles:</span><strong id="cycle-val">0</strong><span>/ <span id="cycle-max">3</span></span><span class="locked-badge hidden" id="locked-badge">LOCKED</span></div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="pressStart()">START (Toggle Direction)</button>
+                    <button class="plc-btn rbtn" onclick="pressReset()">RESET</button>
+                </div>
+                <div class="edit-row-inline"><label>Cycle limit (N):</label><input type="number" id="n-input" value="3" min="1" max="99" onchange="plc.set('N_LIMIT',parseInt(this.value)||3);plc.notifyListeners()"></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span></div>
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae2-app.js"></script>
+</body>
+</html>

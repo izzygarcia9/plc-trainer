@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - AE-2: Find Highest of 5 Variables</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae2-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">AE-2: Compare 5 Variables &mdash; Find Highest</div>
+        <div class="nav-links">
+            <a href="hub.html" class="nav-link">&#8592; Hub</a>
+        </div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Create a program in which when a user pushes start button, program should compare 5 random numerical variables and store the highest number in a variable called HIGHEST.</div>
+
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128202; HMI Panel</h2>
+            <div class="hmi-content">
+                <!-- Variable display -->
+                <div class="var-display">
+                    <div class="var-card" id="var-a"><label>VAR_A</label><span id="val-a">0</span></div>
+                    <div class="var-card" id="var-b"><label>VAR_B</label><span id="val-b">0</span></div>
+                    <div class="var-card" id="var-c"><label>VAR_C</label><span id="val-c">0</span></div>
+                    <div class="var-card" id="var-d"><label>VAR_D</label><span id="val-d">0</span></div>
+                    <div class="var-card" id="var-e"><label>VAR_E</label><span id="val-e">0</span></div>
+                </div>
+                <div class="result-display">
+                    <div class="result-label">HIGHEST</div>
+                    <div class="result-value" id="highest-val">0</div>
+                    <div class="result-source" id="highest-src">&mdash;</div>
+                </div>
+                <!-- Bar chart -->
+                <div class="bar-chart" id="bar-chart"></div>
+                <!-- Controls -->
+                <div class="plc-buttons">
+                    <button class="plc-btn start-btn" onclick="pressStart()">START (Randomize &amp; Compare)</button>
+                    <button class="plc-btn edit-btn" onclick="toggleEdit()">Edit Values</button>
+                </div>
+                <div class="edit-panel hidden" id="edit-panel">
+                    <div class="edit-row"><label>VAR_A:</label><input type="number" id="edit-a" value="0"></div>
+                    <div class="edit-row"><label>VAR_B:</label><input type="number" id="edit-b" value="0"></div>
+                    <div class="edit-row"><label>VAR_C:</label><input type="number" id="edit-c" value="0"></div>
+                    <div class="edit-row"><label>VAR_D:</label><input type="number" id="edit-d" value="0"></div>
+                    <div class="edit-row"><label>VAR_E:</label><input type="number" id="edit-e" value="0"></div>
+                    <button class="plc-btn start-btn" onclick="applyManual()">Apply &amp; Scan</button>
+                </div>
+                <div class="scan-controls">
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info">
+                        <span>Scan #: <strong id="scan-count">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ladder-panel" class="panel">
+            <h2>&#128208; Ladder Logic</h2>
+            <div class="ladder-content" id="ladder-content"></div>
+        </section>
+
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table">
+                <thead><tr><th>Address</th><th>Tag Name</th><th>Type</th><th>Value</th><th>Description</th></tr></thead>
+                <tbody id="register-body"></tbody>
+            </table>
+            <div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div>
+        </section>
+    </main>
+
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="ae2-app.js"></script>
+</body>
+</html>

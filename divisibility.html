@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - Divisibility Check Logic</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="divisibility-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">Scenario: Divisibility Check (FizzBuzz)</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HVAC</a>
+            <a href="shuttle.html" class="nav-link">Shuttle</a>
+            <a href="traffic.html" class="nav-link">Traffic</a>
+            <a href="gravel.html" class="nav-link">Gravel</a>
+            <a href="oneshot.html" class="nav-link">One-Shot</a>
+        </div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Divisibility Check Logic: Evaluate input value. If divisible by 3 only, answer = 3. If divisible by 5 only, answer = 5. If divisible by both 3 and 5, answer = 15. If not divisible by 3 or 5, answer = 0. Use appropriate math/compare instructions. Evaluate in correct order of precedence.</div>
+
+    <main>
+        <!-- HMI Panel -->
+        <section id="hmi-panel" class="panel">
+            <h2>&#128290; HMI Panel</h2>
+            <div class="hmi-content">
+
+                <!-- Big display -->
+                <div class="div-display">
+                    <div class="div-input-section">
+                        <label>INPUT</label>
+                        <div class="big-value" id="input-display">4</div>
+                    </div>
+                    <div class="div-arrow">&#10132;</div>
+                    <div class="div-answer-section" id="answer-section">
+                        <label>ANSWER</label>
+                        <div class="big-value" id="answer-display">0</div>
+                    </div>
+                </div>
+
+                <!-- Rule display -->
+                <div class="rule-box" id="rule-box">
+                    <div class="rule" id="rule-none">&#10060; Not divisible by 3 or 5 &rarr; answer = 0</div>
+                    <div class="rule" id="rule-3">&#128994; Divisible by 3 only &rarr; answer = 3</div>
+                    <div class="rule" id="rule-5">&#128309; Divisible by 5 only &rarr; answer = 5</div>
+                    <div class="rule" id="rule-15">&#11088; Divisible by 3 AND 5 &rarr; answer = 15</div>
+                </div>
+
+                <!-- Remainder visualization -->
+                <div class="remainder-viz">
+                    <div class="rem-card" id="rem3-card">
+                        <div class="rem-label">INPUT &divide; 3</div>
+                        <div class="rem-calc" id="rem3-calc">4 &divide; 3 = 1 R <strong>1</strong></div>
+                        <div class="rem-result" id="rem3-result">remainder3 = 1</div>
+                    </div>
+                    <div class="rem-card" id="rem5-card">
+                        <div class="rem-label">INPUT &divide; 5</div>
+                        <div class="rem-calc" id="rem5-calc">4 &divide; 5 = 0 R <strong>4</strong></div>
+                        <div class="rem-result" id="rem5-result">remainder5 = 4</div>
+                    </div>
+                </div>
+
+                <!-- Input controls -->
+                <div class="input-controls">
+                    <label for="input-val">Set INPUT value:</label>
+                    <div class="temp-input-group">
+                        <button class="temp-btn" onclick="adjustInput(-5)">-5</button>
+                        <button class="temp-btn" onclick="adjustInput(-1)">-1</button>
+                        <input type="number" id="input-val" value="4" min="0" max="9999">
+                        <button class="temp-btn" onclick="adjustInput(1)">+1</button>
+                        <button class="temp-btn" onclick="adjustInput(5)">+5</button>
+                    </div>
+                    <button class="apply-btn" onclick="applyInput()">Apply &amp; Scan</button>
+                </div>
+
+                <!-- Quick test buttons -->
+                <div class="quick-tests">
+                    <label>Quick test:</label>
+                    <div class="quick-btn-row">
+                        <button class="quick-btn" onclick="quickSet(4)">4</button>
+                        <button class="quick-btn q3" onclick="quickSet(9)">9</button>
+                        <button class="quick-btn q5" onclick="quickSet(10)">10</button>
+                        <button class="quick-btn q15" onclick="quickSet(15)">15</button>
+                        <button class="quick-btn q15" onclick="quickSet(30)">30</button>
+                        <button class="quick-btn" onclick="quickSet(7)">7</button>
+                        <button class="quick-btn q3" onclick="quickSet(12)">12</button>
+                        <button class="quick-btn q5" onclick="quickSet(25)">25</button>
+                        <button class="quick-btn q15" onclick="quickSet(45)">45</button>
+                        <button class="quick-btn" onclick="quickSet(0)">0</button>
+                    </div>
+                </div>
+
+                <!-- Scan Controls -->
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; AUTO SCAN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info">
+                        <span>Scan #: <strong id="scan-count">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ladder Logic Panel -->
+        <section id="ladder-panel" class="panel">
+            <h2>&#128208; Ladder Logic</h2>
+            <div class="ladder-content" id="ladder-content"></div>
+        </section>
+
+        <!-- Register Table Panel -->
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Tag Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="register-body"></tbody>
+            </table>
+            <div class="scan-log">
+                <h3>Scan Log</h3>
+                <div id="scan-log" class="log-output"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="divisibility-app.js"></script>
+</body>
+</html>

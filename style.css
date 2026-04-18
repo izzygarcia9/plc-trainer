@@ -1,0 +1,524 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+header {
+    background: #16213e;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 2px solid #0f3460;
+}
+
+header h1 {
+    font-size: 1.4rem;
+    color: #00d4ff;
+}
+
+.scenario-label {
+    background: #0f3460;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #7ec8e3;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 340px 1fr 320px;
+    grid-template-rows: 1fr;
+    gap: 8px;
+    padding: 8px;
+    height: calc(100vh - 56px);
+}
+
+.panel {
+    background: #16213e;
+    border-radius: 8px;
+    border: 1px solid #0f3460;
+    overflow-y: auto;
+}
+
+.panel h2 {
+    font-size: 1rem;
+    padding: 10px 16px;
+    background: #0f3460;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* HMI Panel */
+.hmi-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.thermostat {
+    text-align: center;
+}
+
+.thermo-ring {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 6px solid #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    transition: border-color 0.5s, box-shadow 0.5s;
+}
+
+.thermo-ring.heating {
+    border-color: #ff6b35;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+}
+
+.thermo-ring.cooling {
+    border-color: #00b4d8;
+    box-shadow: 0 0 20px rgba(0, 180, 216, 0.4);
+}
+
+.thermo-ring.idle {
+    border-color: #4a4a4a;
+}
+
+.thermo-temp {
+    font-size: 2.8rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.thermo-unit {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.setpoint-label {
+    color: #7ec8e3;
+    font-size: 0.9rem;
+}
+
+.equipment {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+.equip-box {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #333;
+    transition: all 0.3s;
+    background: #1a1a2e;
+}
+
+.equip-box.active {
+    border-color: currentColor;
+}
+
+#heater-visual.active {
+    background: rgba(255, 107, 53, 0.15);
+    border-color: #ff6b35;
+    color: #ff6b35;
+}
+
+#ac-visual.active {
+    background: rgba(0, 180, 216, 0.15);
+    border-color: #00b4d8;
+    color: #00b4d8;
+}
+
+.equip-icon {
+    font-size: 2rem;
+    margin-bottom: 4px;
+    transition: transform 0.3s;
+}
+
+.equip-box.active .equip-icon {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.equip-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.equip-status {
+    font-size: 0.85rem;
+    margin-top: 4px;
+    font-weight: bold;
+}
+
+.input-controls {
+    width: 100%;
+    text-align: center;
+}
+
+.input-controls label {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.temp-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.temp-btn {
+    background: #0f3460;
+    color: #7ec8e3;
+    border: 1px solid #1a5276;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.temp-btn:hover {
+    background: #1a5276;
+}
+
+#room-temp-input {
+    width: 70px;
+    text-align: center;
+    padding: 6px;
+    font-size: 1.1rem;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border: 1px solid #0f3460;
+    border-radius: 4px;
+}
+
+.apply-btn {
+    background: #00d4ff;
+    color: #1a1a2e;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.apply-btn:hover {
+    background: #00b4d8;
+}
+
+.scan-controls {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.scan-controls button {
+    background: #0f3460;
+    color: #00d4ff;
+    border: 1px solid #1a5276;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 0 4px;
+}
+
+.scan-controls button:hover {
+    background: #1a5276;
+}
+
+#run-btn.running {
+    background: #c0392b;
+    color: white;
+    border-color: #e74c3c;
+}
+
+.scan-info {
+    display: flex;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+#scan-speed {
+    width: 80%;
+    accent-color: #00d4ff;
+}
+
+/* Ladder Logic Panel */
+.ladder-content {
+    padding: 12px;
+}
+
+.rung {
+    position: relative;
+    margin-bottom: 4px;
+    padding: 8px 12px;
+    border: 1px solid #2a2a4a;
+    border-radius: 4px;
+    background: #1a1a2e;
+    transition: background 0.3s, border-color 0.3s;
+}
+
+.rung.energized {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.08);
+}
+
+.rung-number {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 0.65rem;
+    color: #555;
+}
+
+.rung-comment {
+    font-size: 0.7rem;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 6px;
+    padding-left: 24px;
+}
+
+.rung-diagram {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    white-space: pre;
+    line-height: 1.4;
+    color: #aaa;
+}
+
+.rung.energized .rung-diagram {
+    color: #2ecc71;
+}
+
+.rung-diagram .contact {
+    color: #7ec8e3;
+}
+
+.rung-diagram .coil {
+    color: #e67e22;
+}
+
+.rung-diagram .energized-element {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.rung-diagram .de-energized-element {
+    color: #555;
+}
+
+/* Ladder SVG rendering */
+.ladder-svg {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.ladder-rung-visual {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    min-height: 48px;
+}
+
+.rail {
+    width: 3px;
+    background: #555;
+    min-height: 48px;
+}
+
+.rail.energized {
+    background: #2ecc71;
+}
+
+.wire {
+    height: 2px;
+    flex: 1;
+    background: #555;
+    min-width: 20px;
+}
+
+.wire.energized {
+    background: #2ecc71;
+}
+
+.ladder-element {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2px 6px;
+    border: 1px solid #444;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    min-width: 60px;
+    background: #1e1e3a;
+    transition: all 0.3s;
+}
+
+.ladder-element.contact-no {
+    border-color: #3498db;
+}
+
+.ladder-element.contact-nc {
+    border-color: #9b59b6;
+}
+
+.ladder-element.coil-out {
+    border-color: #e67e22;
+    border-radius: 50%;
+    min-width: 50px;
+    min-height: 50px;
+    justify-content: center;
+}
+
+.ladder-element.energized {
+    background: rgba(46, 204, 113, 0.15);
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.ladder-element .elem-symbol {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.ladder-element .elem-tag {
+    font-size: 0.6rem;
+    color: #888;
+    margin-top: 2px;
+}
+
+.ladder-element.energized .elem-tag {
+    color: #2ecc71;
+}
+
+/* Register Table */
+#register-panel {
+    font-size: 0.85rem;
+}
+
+#register-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#register-table th {
+    background: #0f3460;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 0.75rem;
+    position: sticky;
+    top: 38px;
+    z-index: 1;
+}
+
+#register-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #2a2a4a;
+    font-size: 0.75rem;
+}
+
+#register-table tr.changed td {
+    background: rgba(0, 212, 255, 0.1);
+}
+
+#register-table td.value-cell {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-align: center;
+}
+
+td.val-true {
+    color: #2ecc71;
+}
+
+td.val-false {
+    color: #e74c3c;
+}
+
+td.val-number {
+    color: #f39c12;
+}
+
+.scan-log {
+    padding: 8px 12px;
+}
+
+.scan-log h3 {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: #7ec8e3;
+}
+
+.log-output {
+    background: #0d0d1a;
+    border: 1px solid #2a2a4a;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #888;
+}
+
+.log-entry {
+    margin-bottom: 2px;
+}
+
+.log-entry.action {
+    color: #f39c12;
+}
+
+.log-entry.state-change {
+    color: #2ecc71;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        height: auto;
+    }
+    .panel {
+        max-height: 500px;
+    }
+}
+
+/* Challenge description banner */
+.challenge-desc{background:#111520;border-bottom:1px solid #1a3a1a;padding:10px 20px;font-size:.8rem;color:#aaa;line-height:1.5;max-height:120px;overflow-y:auto}
+.challenge-desc strong{color:#2ecc71}

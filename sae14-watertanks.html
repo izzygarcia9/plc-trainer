@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-14: Sequential Water Tanks</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-14: Sequential Water Tank Filling (3 Tanks)</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Sequential Water Tank Filling: Fill Tank 1, then Tank 2, then Tank 3. Stop filling each when high-level sensor activates. If all tanks full, stop system. Include manual override button for each tank.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128167; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="tanks-row">
+                    <div class="tk"><div class="tk-valve" id="v1">V1</div><div class="tk-body"><div class="tk-water" id="w1"></div><div class="tk-hi" id="h1">HI</div><div class="tk-lo" id="l1">LO</div><div class="tk-lbl">T1</div></div><button class="plc-btn" style="padding:2px 6px;font-size:.6rem;border-color:#555;color:#888" onclick="manualOverride(1)">Override</button></div>
+                    <div class="tk"><div class="tk-valve" id="v2">V2</div><div class="tk-body"><div class="tk-water" id="w2"></div><div class="tk-hi" id="h2">HI</div><div class="tk-lo" id="l2">LO</div><div class="tk-lbl">T2</div></div><button class="plc-btn" style="padding:2px 6px;font-size:.6rem;border-color:#555;color:#888" onclick="manualOverride(2)">Override</button></div>
+                    <div class="tk"><div class="tk-valve" id="v3">V3</div><div class="tk-body"><div class="tk-water" id="w3"></div><div class="tk-hi" id="h3">HI</div><div class="tk-lo" id="l3">LO</div><div class="tk-lbl">T3</div></div><button class="plc-btn" style="padding:2px 6px;font-size:.6rem;border-color:#555;color:#888" onclick="manualOverride(3)">Override</button></div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="pressStart()">START</button>
+                    <button class="plc-btn rbtn" onclick="pressStop()">STOP</button>
+                    <button class="plc-btn bbtn" onclick="drainAll()">Drain All</button>
+                </div>
+                <div class="cycle-info"><span>State: <strong id="state-display">IDLE</strong></span></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">300</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="300" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae14-app.js"></script>
+    <style>
+    .tanks-row{display:flex;gap:20px;justify-content:center;width:100%}
+    .tk{display:flex;flex-direction:column;align-items:center;gap:4px}
+    .tk-valve{font-size:.6rem;font-weight:bold;padding:3px 8px;border:1px solid #333;border-radius:3px;color:#555;transition:all .3s}
+    .tk-valve.open{border-color:#3498db;color:#3498db;background:rgba(52,152,219,.15)}
+    .tk-body{width:60px;height:90px;border:3px solid #555;border-radius:0 0 6px 6px;border-top:none;position:relative;background:#1a1a2e;overflow:hidden}
+    .tk-body::before{content:'';position:absolute;top:-3px;left:-3px;right:-3px;height:5px;background:#555;border-radius:3px 3px 0 0}
+    .tk-water{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#3498db,#2980b9);transition:height .3s}
+    .tk-hi,.tk-lo{position:absolute;right:-18px;font-size:.45rem;font-weight:bold;color:#555;transition:color .3s}
+    .tk-hi{top:10%}.tk-lo{bottom:15%}
+    .tk-hi.on,.tk-lo.on{color:#2ecc71}
+    .tk-lbl{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.6rem;color:#888;z-index:1}
+    </style>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - AE-5: Bottle Fill Conveyor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae5-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">AE-5: Bottle Fill Conveyor</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Run a bottle fill conveyor. When bottle breaks sensor, have conveyor stop and fill bottle for 5 sec, then continue on, unlatching sensor. Inputs are toggle on start button and turning on product present sensor.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#127870; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="conveyor-scene">
+                    <div class="fill-nozzle" id="fill-nozzle"><div class="nozzle-stream" id="nozzle-stream"></div></div>
+                    <div class="sensor-beam" id="sensor-beam"></div>
+                    <div class="sensor-label">PE</div>
+                    <div class="conv-track">
+                        <div class="bottle" id="bottle"><div class="bottle-liquid" id="bottle-liquid"></div></div>
+                    </div>
+                    <div class="conv-rollers" id="conv-rollers"></div>
+                </div>
+                <div class="equipment">
+                    <div class="equip-box" id="conv-box"><div class="equip-icon">&#9881;</div><div class="equip-label">CONVEYOR</div><div class="equip-status" id="conv-status">OFF</div></div>
+                    <div class="equip-box" id="sensor-box"><div class="equip-icon">&#128308;</div><div class="equip-label">SENSOR</div><div class="equip-status" id="sensor-status">CLEAR</div></div>
+                    <div class="equip-box" id="fill-box"><div class="equip-icon">&#128167;</div><div class="equip-label">FILL VALVE</div><div class="equip-status" id="fill-status">CLOSED</div></div>
+                </div>
+                <div class="timer-bars">
+                    <div class="timer-bar-row">
+                        <span class="tbar-label" style="color:#3498db">FILL</span>
+                        <div class="tbar-track"><div class="tbar-fill" id="fill-bar" style="width:0%;background:#3498db"></div></div>
+                        <span class="tbar-time" id="fill-time">0 / 5s</span>
+                    </div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn start-btn" id="start-btn" onclick="pressStart()">START</button>
+                    <button class="plc-btn" style="background:#1a1a2e;color:#f39c12;border-color:#d4ac0d" onclick="toggleSensor()">Toggle Sensor (PE)</button>
+                </div>
+                <div class="cycle-info">
+                    <span>State: <strong id="state-display">IDLE</strong></span>
+                    <span>Bottles: <strong id="bottle-count">0</strong></span>
+                </div>
+                <div class="time-scale-control">
+                    <label>1 second = <strong id="scale-display">1</strong> scan(s)</label>
+                    <input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;">
+                </div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">500</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="500" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table"><thead><tr><th>Address</th><th>Tag</th><th>Type</th><th>Value</th><th>Description</th></tr></thead><tbody id="register-body"></tbody></table>
+            <div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div>
+        </section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="ae5-app.js"></script>
+</body>
+</html>

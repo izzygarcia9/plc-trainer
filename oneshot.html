@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - One-Shot Toggle Latch</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="oneshot-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">Scenario: One-Shot Rising (OSR) &mdash; Toggle Latch</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HVAC</a>
+            <a href="shuttle.html" class="nav-link">Shuttle</a>
+            <a href="divisibility.html" class="nav-link">Divisibility</a>
+            <a href="traffic.html" class="nav-link">Traffic</a>
+            <a href="gravel.html" class="nav-link">Gravel</a>
+        </div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Create a one shot push button and using this push button create a program to latch ON the bulb (bulb will continue to remain ON) when the push button is PRESSED ONCE. When the push button is pressed again the bulb goes OFF (and remains in OFF state) until the push button is pressed again.</div>
+
+    <main>
+        <!-- HMI Panel -->
+        <section id="hmi-panel" class="panel">
+            <h2>&#128161; HMI Panel</h2>
+            <div class="hmi-content">
+
+                <!-- Big visual: button + bulb -->
+                <div class="visual-row">
+                    <div class="push-button-wrapper">
+                        <button class="push-button" id="push-button"
+                                onmousedown="buttonDown()" onmouseup="buttonUp()"
+                                ontouchstart="buttonDown()" ontouchend="buttonUp()">
+                            <div class="pb-cap" id="pb-cap"></div>
+                        </button>
+                        <div class="pb-label">PUSH BUTTON</div>
+                        <div class="pb-state" id="pb-state">RELEASED</div>
+                    </div>
+
+                    <div class="arrow-connector">
+                        <div class="arrow-line"></div>
+                        <div class="osr-badge" id="osr-badge">OSR</div>
+                        <div class="arrow-line"></div>
+                    </div>
+
+                    <div class="bulb-wrapper">
+                        <div class="bulb" id="bulb">
+                            <div class="bulb-glow" id="bulb-glow"></div>
+                            <div class="bulb-filament">&#128161;</div>
+                        </div>
+                        <div class="bulb-label">BULB</div>
+                        <div class="bulb-state" id="bulb-state">OFF</div>
+                    </div>
+                </div>
+
+                <!-- Timing diagram -->
+                <div class="timing-section">
+                    <h3>Signal Timing Diagram</h3>
+                    <canvas id="timing-canvas" width="290" height="160"></canvas>
+                </div>
+
+                <!-- Explanation -->
+                <div class="explain-box">
+                    <div class="explain-title">How One-Shot Rising (OSR) works:</div>
+                    <div class="explain-row">
+                        <span class="ex-label">PB_INPUT:</span>
+                        <span class="ex-val" id="ex-input">0</span>
+                        <span class="ex-desc">Raw button state (held = 1)</span>
+                    </div>
+                    <div class="explain-row">
+                        <span class="ex-label">PB_PREV:</span>
+                        <span class="ex-val" id="ex-prev">0</span>
+                        <span class="ex-desc">Button state from LAST scan</span>
+                    </div>
+                    <div class="explain-row">
+                        <span class="ex-label">ONE_SHOT:</span>
+                        <span class="ex-val" id="ex-oneshot">0</span>
+                        <span class="ex-desc">= INPUT AND NOT PREV (1 scan only)</span>
+                    </div>
+                    <div class="explain-row">
+                        <span class="ex-label">BULB_OUT:</span>
+                        <span class="ex-val" id="ex-bulb">0</span>
+                        <span class="ex-desc">Toggles on each one-shot pulse</span>
+                    </div>
+                </div>
+
+                <!-- Scan Controls -->
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info">
+                        <span>Scan #: <strong id="scan-count">0</strong></span>
+                        <span>Scan Time: <strong id="scan-time">200</strong>ms</span>
+                    </div>
+                    <input type="range" id="scan-speed" min="50" max="1000" value="200" step="50"
+                           oninput="updateScanSpeed(this.value)">
+                    <div class="scan-hint">Hold the button across multiple scans to see the one-shot fire only once</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ladder Logic Panel -->
+        <section id="ladder-panel" class="panel">
+            <h2>&#128208; Ladder Logic</h2>
+            <div class="ladder-content" id="ladder-content"></div>
+        </section>
+
+        <!-- Register Table Panel -->
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Tag Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="register-body"></tbody>
+            </table>
+            <div class="scan-log">
+                <h3>Scan Log</h3>
+                <div id="scan-log" class="log-output"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="oneshot-app.js"></script>
+</body>
+</html>

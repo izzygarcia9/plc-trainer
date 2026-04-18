@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Fiddle — Ladder Logic Editor</title>
+    <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Fiddle</h1>
+        <div class="header-controls">
+            <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+            <button onclick="singleScan()">&#9193; Scan</button>
+            <span class="scan-label">Scan #<strong id="scan-num">0</strong></span>
+            <span class="scan-label"><strong id="scan-ms">200</strong>ms</span>
+            <input type="range" id="speed-slider" min="50" max="1000" value="200" step="50" oninput="setScanSpeed(this.value)">
+        </div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+
+    <div class="challenge-banner">
+        <strong>Challenge AE-1:</strong> Create a one-shot push button. When pressed once, latch the bulb ON. When pressed again, turn it OFF. 
+        Tags provided: <code>PB_INPUT</code> (toggle this as your push button), <code>BULB_OUT</code> (this should toggle on/off).
+        You'll need to create additional internal tags for edge detection and latching.
+    </div>
+
+    <div class="workspace">
+        <!-- Tag Panel -->
+        <aside id="tag-panel">
+            <h3>Tags <button class="small-btn" onclick="addTagPrompt()">+ Add</button></h3>
+            <div id="tag-list"></div>
+        </aside>
+
+        <!-- Ladder Editor -->
+        <section id="ladder-editor">
+            <div class="toolbar">
+                <span class="tb-label">Add Instruction:</span>
+                <button class="inst-btn" onclick="addInst('XIC')" title="Examine If Closed (NO)">&#9472;] [&#9472; XIC</button>
+                <button class="inst-btn" onclick="addInst('XIO')" title="Examine If Open (NC)">&#9472;]/[&#9472; XIO</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTE')" title="Output Energize">&#9472;( )&#9472; OTE</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTL')" title="Output Latch">&#9472;(L)&#9472; OTL</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTU')" title="Output Unlatch">&#9472;(U)&#9472; OTU</button>
+                <button class="inst-btn math-btn" onclick="addInst('TON')" title="Timer On-Delay">TON</button>
+                <button class="inst-btn math-btn" onclick="addInst('MOV')" title="Move">MOV</button>
+                <button class="inst-btn math-btn" onclick="addInst('ADD')" title="Add">ADD</button>
+                <button class="inst-btn math-btn" onclick="addInst('SUB')" title="Subtract">SUB</button>
+                <button class="inst-btn math-btn" onclick="addInst('MUL')" title="Multiply">MUL</button>
+                <button class="inst-btn math-btn" onclick="addInst('DIV')" title="Divide">DIV</button>
+                <button class="inst-btn cmp-btn" onclick="addInst('GRT')" title="Greater Than">GRT</button>
+                <button class="inst-btn cmp-btn" onclick="addInst('LES')" title="Less Than">LES</button>
+                <button class="inst-btn cmp-btn" onclick="addInst('EQU')" title="Equal">EQU</button>
+                <span class="tb-sep">|</span>
+                <button class="inst-btn rung-btn" onclick="addRung()">+ Rung</button>
+            </div>
+            <div id="rungs-container"></div>
+        </section>
+
+        <!-- I/O Panel -->
+        <aside id="io-panel">
+            <h3>I/O Monitor</h3>
+            <div id="io-list"></div>
+        </aside>
+    </div>
+
+    <script src="editor-engine.js"></script>
+    <script src="editor-ui.js"></script>
+</body>
+</html>

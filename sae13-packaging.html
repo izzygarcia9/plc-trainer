@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-13: Automated Packaging</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-13: Automated Packaging Cycle (50 units)</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Automated Packaging: Fill package for 10 seconds, seal for 5 seconds, transfer via conveyor for 3 seconds. Repeat 50 times then stop. Include counter for completed packages and Reset button.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128230; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="phase-display">
+                    <div class="phase-box" id="fill-phase"><div class="phase-icon">&#128167;</div><div>FILL</div><div class="phase-time" id="fill-t">0/10s</div></div>
+                    <div class="phase-arrow">&#8594;</div>
+                    <div class="phase-box" id="seal-phase"><div class="phase-icon">&#128293;</div><div>SEAL</div><div class="phase-time" id="seal-t">0/5s</div></div>
+                    <div class="phase-arrow">&#8594;</div>
+                    <div class="phase-box" id="xfer-phase"><div class="phase-icon">&#9881;</div><div>TRANSFER</div><div class="phase-time" id="xfer-t">0/3s</div></div>
+                </div>
+                <div class="cycle-display"><span>Package</span><strong id="pkg-val">0</strong><span>/ 50</span></div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="pressStart()">START</button>
+                    <button class="plc-btn rbtn" onclick="pressReset()">RESET</button>
+                </div>
+                <div class="cycle-info"><span>State: <strong id="state-display">IDLE</strong></span></div>
+                <div class="time-scale-control"><label>1 sec = <strong id="scale-display">1</strong> scan(s)</label><input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;"></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">300</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="300" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae13-app.js"></script>
+    <style>
+    .phase-display{display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+    .phase-box{text-align:center;padding:10px 16px;border:2px solid #333;border-radius:8px;min-width:70px;font-size:.75rem;font-weight:bold;color:#555;transition:all .3s}
+    .phase-box.active{border-color:#2ecc71;color:#2ecc71;background:rgba(46,204,113,.1)}
+    .phase-icon{font-size:1.5rem;margin-bottom:2px}
+    .phase-time{font-size:.6rem;color:#666;margin-top:2px;font-family:'Courier New',monospace}
+    .phase-arrow{color:#444;font-size:1rem}
+    .cycle-display{display:flex;align-items:center;gap:8px;justify-content:center;font-size:1rem}
+    .cycle-display strong{font-size:2.2rem;font-family:'Courier New',monospace;color:#00d4ff}
+    </style>
+</body>
+</html>

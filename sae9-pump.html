@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-9: Pump-Out Float Control</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-9: Pump-Out Control &mdash; Float Monitoring</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Pump-Out Control: System Start toggle activates system and pilot light. When both Low-Level and High-Level floats are active, pump starts. When High-Level goes inactive, pump continues. Pump stops only when Low-Level goes inactive. Pump restarts when both floats active again. Stop button deactivates everything.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128167; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="tank-scene">
+                    <div class="pump-tank"><div class="pump-water" id="pump-water"></div>
+                        <div class="float-mark hi-float" id="hi-float">HI</div>
+                        <div class="float-mark lo-float" id="lo-float">LO</div>
+                        <div class="tank-label-inner">TANK</div>
+                    </div>
+                    <div class="pump-icon" id="pump-icon">&#9881;</div>
+                </div>
+                <div class="equipment">
+                    <div class="equip-box" id="sys-box"><div class="equip-icon">&#128161;</div><div class="equip-label">SYSTEM</div><div class="equip-status" id="sys-status">OFF</div></div>
+                    <div class="equip-box" id="pump-box"><div class="equip-icon">&#9881;</div><div class="equip-label">PUMP</div><div class="equip-status" id="pump-status">OFF</div></div>
+                    <div class="equip-box" id="hi-box"><div class="equip-icon">&#128316;</div><div class="equip-label">HI FLOAT</div><div class="equip-status" id="hi-status">OFF</div></div>
+                    <div class="equip-box" id="lo-box"><div class="equip-icon">&#128317;</div><div class="equip-label">LO FLOAT</div><div class="equip-status" id="lo-status">OFF</div></div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="toggleSysStart()">Toggle System Start</button>
+                    <button class="plc-btn rbtn" onclick="pressStop()">STOP</button>
+                    <button class="plc-btn ybtn" onclick="toggleHiFloat()">Toggle HI Float</button>
+                    <button class="plc-btn ybtn" onclick="toggleLoFloat()">Toggle LO Float</button>
+                    <button class="plc-btn bbtn" onclick="fillTank()">Simulate Fill</button>
+                </div>
+                <div class="cycle-info"><span>State: <strong id="state-display">INACTIVE</strong></span><span>Pump cycles: <strong id="cycle-count">0</strong></span></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRunPLC()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span></div>
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae9-app.js"></script>
+    <style>
+    .tank-scene{display:flex;align-items:center;justify-content:center;gap:16px;width:100%}
+    .pump-tank{width:80px;height:120px;border:3px solid #555;border-radius:0 0 8px 8px;border-top:none;position:relative;background:#1a1a2e;overflow:hidden}
+    .pump-tank::before{content:'';position:absolute;top:-3px;left:-3px;right:-3px;height:6px;background:#555;border-radius:3px 3px 0 0}
+    .pump-water{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#3498db,#2980b9);transition:height .5s}
+    .float-mark{position:absolute;right:-24px;font-size:.5rem;font-weight:bold;padding:1px 4px;border-radius:2px;border:1px solid #333;color:#555;transition:all .3s}
+    .hi-float{top:20%}.lo-float{bottom:20%}
+    .float-mark.active{border-color:#2ecc71;color:#2ecc71;background:rgba(46,204,113,.1)}
+    .tank-label-inner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.6rem;color:#666;z-index:1}
+    .pump-icon{font-size:2rem;color:#555;transition:all .3s}
+    .pump-icon.on{color:#2ecc71;animation:spin 1s linear infinite}
+    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    </style>
+</body>
+</html>

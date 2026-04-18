@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - AE-13: Dual Conveyor Energy Saving</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae13-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">AE-13: Dual Conveyor &mdash; Energy-Saving Logic</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Dual Conveyor Control with Energy-Saving Logic: Conveyor 1 feeds into Conveyor 2. A photoeye detects items between them. If Conveyor 2 is stopped and PE is blocked, Conveyor 1 should stop. If PE remains unblocked for 20 seconds, both conveyors enter energy-saving mode.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#9881; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="conv-scene">
+                    <div class="conv-unit"><div class="conv-label">CONV 1</div><div class="conv-belt" id="conv1-belt"></div><div class="conv-motor-ind" id="conv1-ind">M1</div></div>
+                    <div class="pe-zone"><div class="pe-beam" id="pe-beam"></div><div class="pe-tag">PE</div><div class="item-box" id="item-box">&#128230;</div></div>
+                    <div class="conv-unit"><div class="conv-label">CONV 2</div><div class="conv-belt" id="conv2-belt"></div><div class="conv-motor-ind" id="conv2-ind">M2</div></div>
+                </div>
+                <div class="equipment">
+                    <div class="equip-box" id="c1-box"><div class="equip-icon">&#9881;</div><div class="equip-label">CONV 1</div><div class="equip-status" id="c1-status">OFF</div></div>
+                    <div class="equip-box" id="pe-box"><div class="equip-icon">&#128308;</div><div class="equip-label">PE</div><div class="equip-status" id="pe-status">CLEAR</div></div>
+                    <div class="equip-box" id="c2-box"><div class="equip-icon">&#9881;</div><div class="equip-label">CONV 2</div><div class="equip-status" id="c2-status">OFF</div></div>
+                    <div class="equip-box" id="eco-box"><div class="equip-icon">&#127807;</div><div class="equip-label">ECO MODE</div><div class="equip-status" id="eco-status">OFF</div></div>
+                </div>
+                <div class="timer-bars">
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#27ae60">ECO TMR</span><div class="tbar-track"><div class="tbar-fill" id="eco-bar" style="width:0%;background:#27ae60"></div></div><span class="tbar-time" id="eco-time">0 / 20s</span></div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn" style="background:#1a3a1a;color:#2ecc71;border-color:#27ae60" onclick="toggleConv2()">Toggle Conv 2</button>
+                    <button class="plc-btn" style="background:#1a1a2e;color:#f39c12;border-color:#d4ac0d" onclick="togglePE()">Toggle PE (item)</button>
+                    <button class="plc-btn" style="background:#1a2a3a;color:#3498db;border-color:#2980b9" onclick="startBoth()">Start Both</button>
+                </div>
+                <div class="time-scale-control">
+                    <label>1 second = <strong id="scale-display">1</strong> scan(s)</label>
+                    <input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;">
+                </div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">500</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="500" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table"><thead><tr><th>Address</th><th>Tag</th><th>Type</th><th>Value</th><th>Description</th></tr></thead><tbody id="register-body"></tbody></table>
+            <div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div>
+        </section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="ae13-app.js"></script>
+</body>
+</html>

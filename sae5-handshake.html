@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-5: Controller Handshake</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-5: Controller Handshake &mdash; Success Counter</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Create a handshake between Controller #1 and Controller #2. Once start PB is pressed, communication initiates. Count up 'success' for every 3 seconds of continuous handshake. Communication stops when success reaches 10.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128279; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="handshake-visual">
+                    <div class="ctrl-box" id="ctrl1-box"><div class="ctrl-label">Controller #1</div><div class="ctrl-status" id="ctrl1-status">IDLE</div></div>
+                    <div class="hs-link" id="hs-link"><div class="hs-pulse" id="hs-pulse"></div><div class="hs-text">HANDSHAKE</div></div>
+                    <div class="ctrl-box" id="ctrl2-box"><div class="ctrl-label">Controller #2</div><div class="ctrl-status" id="ctrl2-status">IDLE</div></div>
+                </div>
+                <div class="success-display"><span>SUCCESS:</span><strong id="success-val">0</strong><span>/ 10</span></div>
+                <div class="timer-bars">
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#2ecc71">3s TMR</span><div class="tbar-track"><div class="tbar-fill" id="hs-bar" style="width:0%;background:#2ecc71"></div></div><span class="tbar-time" id="hs-time">0/3s</span></div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="pressStart()">START</button>
+                    <button class="plc-btn rbtn" onclick="pressStop()">STOP</button>
+                    <button class="plc-btn ybtn" onclick="toggleCtrl1()">Toggle Ctrl #1</button>
+                    <button class="plc-btn ybtn" onclick="toggleCtrl2()">Toggle Ctrl #2</button>
+                </div>
+                <div class="cycle-info"><span>State: <strong id="state-display">IDLE</strong></span></div>
+                <div class="time-scale-control"><label>1 sec = <strong id="scale-display">1</strong> scan(s)</label><input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;"></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">500</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="500" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae5-app.js"></script>
+    <style>
+    .handshake-visual{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px}
+    .ctrl-box{padding:12px 16px;border:2px solid #333;border-radius:8px;text-align:center;min-width:100px;transition:all .3s}
+    .ctrl-box.active{border-color:#2ecc71;background:rgba(46,204,113,.1)}
+    .ctrl-box.done{border-color:#f1c40f;background:rgba(241,196,15,.1)}
+    .ctrl-label{font-size:.7rem;color:#888;letter-spacing:1px}.ctrl-status{font-size:.85rem;font-weight:bold;margin-top:4px;color:#555}
+    .hs-link{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .hs-pulse{width:40px;height:4px;background:#333;border-radius:2px;transition:all .3s}
+    .hs-pulse.active{background:#2ecc71;box-shadow:0 0 10px rgba(46,204,113,.5);animation:hs-anim .5s infinite}
+    @keyframes hs-anim{0%,100%{opacity:1}50%{opacity:.4}}
+    .hs-text{font-size:.55rem;color:#555}
+    .success-display{display:flex;align-items:center;gap:8px;justify-content:center;font-size:1rem}
+    .success-display strong{font-size:2rem;font-family:'Courier New',monospace;color:#2ecc71}
+    </style>
+</body>
+</html>

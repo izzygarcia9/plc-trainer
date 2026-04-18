@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - Shuttle Motor (PE1/PE2)</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="shuttle-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">Scenario: Shuttle Motor &mdash; Reciprocating between PE1 &amp; PE2</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HVAC</a>
+            <a href="divisibility.html" class="nav-link">Divisibility</a>
+            <a href="traffic.html" class="nav-link">Traffic</a>
+            <a href="gravel.html" class="nav-link">Gravel</a>
+            <a href="oneshot.html" class="nav-link">One-Shot</a>
+        </div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Write a ladder logic program: When Start button is pressed, motor runs forward until PE1 is triggered. Once PE1 is blocked, motor switches to reverse until PE2 is triggered. When PE2 is blocked, motor switches back to forward. Motor continues cycling between PE1 and PE2 indefinitely. Stop button halts operation immediately.</div>
+
+    <main>
+        <!-- HMI Panel -->
+        <section id="hmi-panel" class="panel">
+            <h2>&#127981; HMI Panel</h2>
+            <div class="hmi-content">
+
+                <!-- Conveyor Animation -->
+                <div class="conveyor-wrapper">
+                    <div class="sensor-label pe1-label" id="pe1-label">PE1</div>
+                    <div class="sensor-label pe2-label" id="pe2-label">PE2</div>
+                    <div class="conveyor-track">
+                        <div class="sensor-post pe1-post" id="pe1-post"></div>
+                        <div class="sensor-post pe2-post" id="pe2-post"></div>
+                        <div class="carriage" id="carriage">
+                            <div class="carriage-body">&#9632;</div>
+                        </div>
+                        <div class="track-line"></div>
+                    </div>
+                    <div class="conveyor-positions">
+                        <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span>
+                    </div>
+                </div>
+
+                <!-- Motor & Sensor Status -->
+                <div class="equipment shuttle-equip">
+                    <div class="equip-box" id="motor-fwd-visual">
+                        <div class="equip-icon">&#9654;</div>
+                        <div class="equip-label">MOTOR FWD</div>
+                        <div class="equip-status" id="motor-fwd-status">OFF</div>
+                    </div>
+                    <div class="equip-box" id="motor-rev-visual">
+                        <div class="equip-icon">&#9664;</div>
+                        <div class="equip-label">MOTOR REV</div>
+                        <div class="equip-status" id="motor-rev-status">OFF</div>
+                    </div>
+                </div>
+
+                <div class="equipment shuttle-equip">
+                    <div class="equip-box sensor-box" id="pe1-visual">
+                        <div class="equip-icon">&#128308;</div>
+                        <div class="equip-label">PE1</div>
+                        <div class="equip-status" id="pe1-status">CLEAR</div>
+                    </div>
+                    <div class="equip-box sensor-box" id="pe2-visual">
+                        <div class="equip-icon">&#128308;</div>
+                        <div class="equip-label">PE2</div>
+                        <div class="equip-status" id="pe2-status">CLEAR</div>
+                    </div>
+                </div>
+
+                <!-- Start / Stop Buttons -->
+                <div class="plc-buttons">
+                    <button class="plc-btn start-btn" id="start-btn" onclick="pressStart()">START</button>
+                    <button class="plc-btn stop-btn" id="stop-btn" onclick="pressStop()">STOP</button>
+                </div>
+
+                <!-- Position display -->
+                <div class="position-display">
+                    Carriage Position: <strong id="position-val">0</strong> / 20
+                </div>
+
+                <!-- Scan Controls -->
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN PLC</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info">
+                        <span>Scan #: <strong id="scan-count">0</strong></span>
+                        <span>Scan Time: <strong id="scan-time">300</strong>ms</span>
+                    </div>
+                    <input type="range" id="scan-speed" min="100" max="2000" value="300" step="50"
+                           oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+
+        <!-- Ladder Logic Panel -->
+        <section id="ladder-panel" class="panel">
+            <h2>&#128208; Ladder Logic</h2>
+            <div class="ladder-content" id="ladder-content"></div>
+        </section>
+
+        <!-- Register Table Panel -->
+        <section id="register-panel" class="panel">
+            <h2>&#128203; Data Table</h2>
+            <table id="register-table">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Tag Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="register-body"></tbody>
+            </table>
+            <div class="scan-log">
+                <h3>Scan Log</h3>
+                <div id="scan-log" class="log-output"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="shuttle-app.js"></script>
+</body>
+</html>

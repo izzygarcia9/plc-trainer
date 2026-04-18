@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-1: Alternating Bulbs</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+    <link rel="stylesheet" href="sae1-style.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-1: Alternating Bulbs &mdash; Cycle Counter</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Create a program: Bulb A turns ON for 5 seconds then OFF. After 3 seconds of Bulb A being OFF, Bulb B turns ON for 5 seconds then OFF. Bulb A turns ON again once Bulb B is OFF. Sequence repeats for a given number of cycles.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#128161; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="bulbs-row">
+                    <div class="bulb-unit"><div class="bulb-circle" id="bulb-a"></div><div class="bulb-label">BULB A</div></div>
+                    <div class="bulb-unit"><div class="bulb-circle" id="bulb-b"></div><div class="bulb-label">BULB B</div></div>
+                </div>
+                <div class="cycle-display"><span>Cycle</span><strong id="cycle-val">0</strong><span>/ <span id="cycle-max">3</span></span></div>
+                <div class="timer-bars">
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#f1c40f">A ON</span><div class="tbar-track"><div class="tbar-fill" id="a-on-bar" style="width:0%;background:#f1c40f"></div></div><span class="tbar-time" id="a-on-time">0/5s</span></div>
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#888">WAIT</span><div class="tbar-track"><div class="tbar-fill" id="wait-bar" style="width:0%;background:#888"></div></div><span class="tbar-time" id="wait-time">0/3s</span></div>
+                    <div class="timer-bar-row"><span class="tbar-label" style="color:#3498db">B ON</span><div class="tbar-track"><div class="tbar-fill" id="b-on-bar" style="width:0%;background:#3498db"></div></div><span class="tbar-time" id="b-on-time">0/5s</span></div>
+                </div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="pressStart()">START</button>
+                    <button class="plc-btn rbtn" onclick="pressStop()">STOP / RESET</button>
+                </div>
+                <div class="edit-row-inline"><label>Cycles (N):</label><input type="number" id="n-input" value="3" min="1" max="99" onchange="plc.set('N_CYCLES',parseInt(this.value)||3);plc.notifyListeners()"></div>
+                <div class="cycle-info"><span>State: <strong id="state-display">IDLE</strong></span></div>
+                <div class="time-scale-control"><label>1 sec = <strong id="scale-display">1</strong> scan(s)</label><input type="range" id="time-scale" min="1" max="10" value="1" step="1" oninput="timeScale=parseInt(this.value);document.getElementById('scale-display').textContent=this.value;"></div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span><span><strong id="scan-time">500</strong>ms</span></div>
+                    <input type="range" id="scan-speed" min="50" max="2000" value="500" step="50" oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae1-app.js"></script>
+</body>
+</html>

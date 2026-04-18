@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Logic Trainer - HVAC Scenario</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>⚡ PLC Logic Trainer</h1>
+        <div class="scenario-label">Scenario: HVAC Heating / Cooling System</div>
+        <a href="shuttle.html" style="margin-left:auto;color:#7ec8e3;text-decoration:none;font-size:0.8rem;padding:4px 12px;border:1px solid #0f3460;border-radius:4px;">Shuttle</a>
+        <a href="divisibility.html" style="color:#7ec8e3;text-decoration:none;font-size:0.8rem;padding:4px 12px;border:1px solid #0f3460;border-radius:4px;">Divisibility</a>
+        <a href="traffic.html" style="color:#7ec8e3;text-decoration:none;font-size:0.8rem;padding:4px 12px;border:1px solid #0f3460;border-radius:4px;">Traffic</a>
+        <a href="gravel.html" style="color:#7ec8e3;text-decoration:none;font-size:0.8rem;padding:4px 12px;border:1px solid #0f3460;border-radius:4px;">Gravel</a>
+        <a href="oneshot.html" style="color:#7ec8e3;text-decoration:none;font-size:0.8rem;padding:4px 12px;border:1px solid #0f3460;border-radius:4px;">One-Shot</a>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Heating/AC system. Monitor room temp. If below 75 turn on heater. If above 75 turn on AC. Each PLC scan will add/sub 1 to room temp based on AC on or heater on. Only inputs should be typing new room temp. AC/Heater should automatically engage.</div>
+
+    <main>
+        <!-- HMI Panel -->
+        <section id="hmi-panel" class="panel">
+            <h2>🏠 HMI Panel</h2>
+            <div class="hmi-content">
+                <!-- Thermostat Display -->
+                <div class="thermostat">
+                    <div class="thermo-ring" id="thermo-ring">
+                        <div class="thermo-temp" id="thermo-temp">72</div>
+                        <div class="thermo-unit">°F</div>
+                    </div>
+                    <div class="setpoint-label">Setpoint: <span id="setpoint-display">75</span>°F</div>
+                </div>
+
+                <!-- Equipment Visual -->
+                <div class="equipment">
+                    <div class="equip-box" id="heater-visual">
+                        <div class="equip-icon" id="heater-icon">🔥</div>
+                        <div class="equip-label">HEATER</div>
+                        <div class="equip-status" id="heater-status">OFF</div>
+                    </div>
+                    <div class="equip-box" id="ac-visual">
+                        <div class="equip-icon" id="ac-icon">❄️</div>
+                        <div class="equip-label">A/C</div>
+                        <div class="equip-status" id="ac-status">OFF</div>
+                    </div>
+                </div>
+
+                <!-- Input Controls -->
+                <div class="input-controls">
+                    <label for="room-temp-input">Set Room Temp (sensor override):</label>
+                    <div class="temp-input-group">
+                        <button class="temp-btn" onclick="adjustTemp(-5)">-5</button>
+                        <button class="temp-btn" onclick="adjustTemp(-1)">-1</button>
+                        <input type="number" id="room-temp-input" value="72" min="30" max="120">
+                        <button class="temp-btn" onclick="adjustTemp(1)">+1</button>
+                        <button class="temp-btn" onclick="adjustTemp(5)">+5</button>
+                    </div>
+                    <button class="apply-btn" onclick="applyTemp()">Apply Temp</button>
+                </div>
+
+                <!-- Scan Controls -->
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">▶ RUN</button>
+                    <button onclick="singleScan()">⏭ Single Scan</button>
+                    <div class="scan-info">
+                        <span>Scan #: <strong id="scan-count">0</strong></span>
+                        <span>Scan Time: <strong id="scan-time">500</strong>ms</span>
+                    </div>
+                    <input type="range" id="scan-speed" min="100" max="2000" value="500" step="100"
+                           oninput="updateScanSpeed(this.value)">
+                </div>
+            </div>
+        </section>
+
+        <!-- Ladder Logic Panel -->
+        <section id="ladder-panel" class="panel">
+            <h2>📐 Ladder Logic</h2>
+            <div class="ladder-content" id="ladder-content">
+                <!-- Rungs rendered by JS -->
+            </div>
+        </section>
+
+        <!-- Register Table Panel -->
+        <section id="register-panel" class="panel">
+            <h2>📋 Data Table</h2>
+            <table id="register-table">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Tag Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="register-body">
+                </tbody>
+            </table>
+            <div class="scan-log">
+                <h3>Scan Log</h3>
+                <div id="scan-log" class="log-output"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

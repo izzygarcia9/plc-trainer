@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Trainer - SAE-11: Weight-Based Sorting</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ae-common.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; PLC Logic Trainer</h1>
+        <div class="scenario-label">SAE-11: Weight-Based Sorting System</div>
+        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+    <div class="challenge-desc"><strong>Challenge:</strong> Weight-Based Sorting: Route items by weight — Light (0-5 kg), Medium (5-15 kg), Heavy (over 15 kg). Include dedicated output for each range, counters for each category, and total items processed counter.</div>
+    <main>
+        <section id="hmi-panel" class="panel">
+            <h2>&#9878; HMI Panel</h2>
+            <div class="hmi-content">
+                <div class="weight-display"><span>WEIGHT:</span><strong id="weight-val">0</strong><span>kg</span></div>
+                <div class="equipment" style="flex-wrap:wrap">
+                    <div class="equip-box" id="light-box" style="border-color:#2ecc71"><div class="equip-icon">&#128230;</div><div class="equip-label">LIGHT (0-5kg)</div><div class="equip-status" id="light-status">OFF</div><div style="font-size:.7rem;color:#888;margin-top:2px">Count: <strong id="light-cnt">0</strong></div></div>
+                    <div class="equip-box" id="med-box" style="border-color:#f39c12"><div class="equip-icon">&#128230;</div><div class="equip-label">MEDIUM (5-15kg)</div><div class="equip-status" id="med-status">OFF</div><div style="font-size:.7rem;color:#888;margin-top:2px">Count: <strong id="med-cnt">0</strong></div></div>
+                    <div class="equip-box" id="heavy-box" style="border-color:#e74c3c"><div class="equip-icon">&#128230;</div><div class="equip-label">HEAVY (15+kg)</div><div class="equip-status" id="heavy-status">OFF</div><div style="font-size:.7rem;color:#888;margin-top:2px">Count: <strong id="heavy-cnt">0</strong></div></div>
+                </div>
+                <div class="cycle-info"><span>Total: <strong id="total-cnt">0</strong></span></div>
+                <div class="plc-buttons">
+                    <button class="plc-btn gbtn" onclick="sendItem(Math.floor(Math.random()*25)+1)">Random Item</button>
+                    <button class="plc-btn gbtn" onclick="sendItem(3)">Light (3kg)</button>
+                    <button class="plc-btn ybtn" onclick="sendItem(10)">Medium (10kg)</button>
+                    <button class="plc-btn rbtn" onclick="sendItem(20)">Heavy (20kg)</button>
+                    <button class="plc-btn bbtn" onclick="resetAll()">RESET</button>
+                </div>
+                <div class="scan-controls">
+                    <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+                    <button onclick="singleScan()">&#9193; Single Scan</button>
+                    <div class="scan-info"><span>Scan #: <strong id="scan-count">0</strong></span></div>
+                </div>
+            </div>
+        </section>
+        <section id="ladder-panel" class="panel"><h2>&#128208; Ladder Logic</h2><div class="ladder-content" id="ladder-content"></div></section>
+        <section id="register-panel" class="panel"><h2>&#128203; Data Table</h2><table id="register-table"><thead><tr><th>Addr</th><th>Tag</th><th>Type</th><th>Value</th><th>Desc</th></tr></thead><tbody id="register-body"></tbody></table><div class="scan-log"><h3>Scan Log</h3><div id="scan-log" class="log-output"></div></div></section>
+    </main>
+    <script src="plc-engine.js"></script>
+    <script src="ladder-renderer.js"></script>
+    <script src="sae11-app.js"></script>
+    <style>.weight-display{display:flex;align-items:center;gap:8px;justify-content:center;font-size:1rem}.weight-display strong{font-size:2.5rem;font-family:'Courier New',monospace;color:#00d4ff}</style>
+</body>
+</html>
