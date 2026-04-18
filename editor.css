@@ -145,3 +145,10 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .tag-item[draggable="true"] { cursor:grab; }
 .tag-item[draggable="true"]:active { cursor:grabbing; }
 .rung-conditions.drag-over, .rung-outputs.drag-over { background:rgba(0,212,255,.05); }
+
+/* Timer/Counter detail display */
+.timer-detail { display:flex; flex-direction:column; gap:1px; font-size:.5rem; text-align:left; }
+.timer-detail div { display:flex; gap:4px; align-items:center; }
+.timer-detail .on { color:#2ecc71; font-weight:bold; }
+.timer-detail .off { color:#555; }
+.inst-block.ton, .inst-block.ctu, .inst-block.ctd { min-width:90px; min-height:60px; }

@@ -120,12 +120,12 @@ function addInst(type) {
     if (!rung) return;
 
     const isOutput = ['OTE', 'OTL', 'OTU', 'TON', 'CTU', 'CTD', 'MOV', 'ADD', 'SUB', 'MUL', 'DIV'].includes(type);
-    const isCondition = ['XIC', 'XIO', 'GRT', 'LES', 'EQU'].includes(type);
+    const isCondition = ['XIC', 'XIO', 'OSR', 'OSF', 'GRT', 'LES', 'EQU', 'GEQ', 'LEQ', 'NEQ'].includes(type);
 
     const inst = { type, tag: '', id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
 
     // For compare instructions, need a second tag
-    if (['GRT', 'LES', 'EQU'].includes(type)) inst.tag2 = '';
+    if (['GRT', 'LES', 'EQU', 'GEQ', 'LEQ', 'NEQ'].includes(type)) inst.tag2 = '';
     // For math, need source and dest
     if (['ADD', 'SUB', 'MUL', 'DIV'].includes(type)) { inst.tag2 = ''; inst.tag3 = ''; }
     if (type === 'MOV') inst.tag2 = '';
@@ -395,12 +395,28 @@ function makeInstBlock(inst, rungIdx, side, instIdx, energized) {
         extraHtml = `<div class="inst-extra">from <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${inst.tag2 || 'src'}</span></div>`;
     }
     if (inst.type === 'TON') {
+        const en = EditorPLC.getTag(inst.tag + '_EN');
+        const tt = EditorPLC.getTag(inst.tag + '_TT');
+        const dn = EditorPLC.getTag(inst.tag + '_DN');
         const acc = EditorPLC.getTag(inst.tag + '_ACC') || 0;
-        extraHtml = `<div class="inst-extra">PRE=<span class="inst-tag" onclick="event.stopPropagation();editTimerPreset('${inst.id}')">${inst.preset || 5}</span> ACC=${acc}</div>`;
+        extraHtml = `<div class="inst-extra timer-detail">
+            <div>EN: <span class="${en?'on':'off'}">${en?'ON':'OFF'}</span></div>
+            <div>TT: <span class="${tt?'on':'off'}">${tt?'ON':'OFF'}</span></div>
+            <div>DN: <span class="${dn?'on':'off'}">${dn?'ON':'OFF'}</span></div>
+            <div>ACC: ${acc}</div>
+            <div>PRE: <span class="inst-tag" onclick="event.stopPropagation();editTimerPreset('${inst.id}')">${inst.preset || 5}</span></div>
+        </div>`;
     }
     if (inst.type === 'CTU' || inst.type === 'CTD') {
+        const en = EditorPLC.getTag(inst.tag + '_EN');
+        const dn = EditorPLC.getTag(inst.tag + '_DN');
         const acc = EditorPLC.getTag(inst.tag + '_ACC') || 0;
-        extraHtml = `<div class="inst-extra">PRE=<span class="inst-tag" onclick="event.stopPropagation();editTimerPreset('${inst.id}')">${inst.preset || 10}</span> ACC=${acc}</div>`;
+        extraHtml = `<div class="inst-extra timer-detail">
+            <div>EN: <span class="${en?'on':'off'}">${en?'ON':'OFF'}</span></div>
+            <div>DN: <span class="${dn?'on':'off'}">${dn?'ON':'OFF'}</span></div>
+            <div>ACC: ${acc}</div>
+            <div>PRE: <span class="inst-tag" onclick="event.stopPropagation();editTimerPreset('${inst.id}')">${inst.preset || 10}</span></div>
+        </div>`;
     }
 
     div.innerHTML = `
@@ -449,7 +465,7 @@ function showInstMenu(e, inst, rungIdx, side, instIdx) {
     }
 
     // Compare type changes
-    if (['GRT','LES','EQU'].includes(inst.type)) {
+    if (['GRT','LES','EQU','GEQ','LEQ','NEQ'].includes(inst.type)) {
         items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','GRT')">GRT (&gt;)</div>`;
         items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','LES')">LES (&lt;)</div>`;
         items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','EQU')">EQU (=)</div>`;
