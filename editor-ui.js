@@ -5,13 +5,39 @@
 let selectedRungIdx = 0;
 let scanInterval = null;
 
-// ─── Initialize with default tags for the one-shot challenge ───
-function initChallenge() {
-    EditorPLC.defineTag('PB_INPUT', 'BOOL', false);
-    EditorPLC.defineTag('BULB_OUT', 'BOOL', false);
-    // Add one empty rung to start
+// ─── Challenge Definitions ───
+const CHALLENGES = {
+    free: { text:"Free build — create any ladder logic you want.", tags:[] },
+    ae1: { text:"Create a one-shot push button. When pressed once, latch the bulb ON. When pressed again, turn it OFF.", tags:[['PB_INPUT','BOOL'],['BULB_OUT','BOOL']] },
+    ae2: { text:"When start is pressed, compare 5 random numerical variables and store the highest in HIGHEST.", tags:[['START_PB','BOOL'],['VAR_A','INT'],['VAR_B','INT'],['VAR_C','INT'],['VAR_D','INT'],['VAR_E','INT'],['HIGHEST','INT']] },
+    ae4: { text:"Monitor room temp. Below 75 turn on heater, above 75 turn on AC. Each scan adds/subtracts 1 degree.", tags:[['ROOM_TEMP','INT'],['HEATER','BOOL'],['AC','BOOL']] },
+    ae5: { text:"Bottle fill conveyor. When bottle breaks sensor, stop conveyor and fill for 5 seconds, then continue.", tags:[['START','BOOL'],['PE_SENSOR','BOOL'],['CONV_MOTOR','BOOL'],['FILL_VALVE','BOOL']] },
+    ae7: { text:"Motor runs forward until PE1, reverses until PE2, cycles indefinitely. Stop button halts immediately.", tags:[['START','BOOL'],['STOP','BOOL'],['PE1','BOOL'],['PE2','BOOL'],['MOTOR_FWD','BOOL'],['MOTOR_REV','BOOL']] },
+    ae9: { text:"Traffic light: Green 30s, Yellow 10s, Red 20s, repeat continuously.", tags:[['GREEN','BOOL'],['YELLOW','BOOL'],['RED','BOOL']] },
+    ae12: { text:"PE1 increments counter, PE2 decrements. Counter reaches 10 = jam. Reset button clears.", tags:[['PE1','BOOL'],['PE2','BOOL'],['RESET','BOOL'],['JAM','BOOL'],['COUNT','INT']] },
+    ae16: { text:"Pallet sensor increments counter. At 3 pallets, conveyor stops. Clear button resets and resumes.", tags:[['PALLET_SENSOR','BOOL'],['CLEAR','BOOL'],['CONV_MOTOR','BOOL'],['COUNT','INT']] },
+    ae18: { text:"Divisibility: div by 3 only=3, div by 5 only=5, both=15, neither=0.", tags:[['INPUT','INT'],['ANSWER','INT']] },
+};
+
+function loadChallenge(id) {
+    const ch = CHALLENGES[id] || CHALLENGES.free;
+    document.getElementById('challenge-text').innerHTML = '<strong>Challenge:</strong> ' + ch.text;
+    // Reset engine
+    EditorPLC.tags = {};
+    EditorPLC.rungs = [];
+    EditorPLC.scanCount = 0;
+    EditorPLC.timerAccs = {};
+    // Load starter tags
+    for (const [name, type] of ch.tags) {
+        EditorPLC.defineTag(name, type, type === 'BOOL' ? false : 0);
+    }
     addRung();
     renderAll();
+}
+
+// ─── Initialize with default challenge ───
+function initChallenge() {
+    loadChallenge('ae1');
 }
 
 // ─── Tag Management ───

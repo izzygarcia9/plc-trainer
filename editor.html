@@ -16,13 +16,23 @@
             <span class="scan-label"><strong id="scan-ms">200</strong>ms</span>
             <input type="range" id="speed-slider" min="50" max="1000" value="200" step="50" oninput="setScanSpeed(this.value)">
         </div>
-        <div class="nav-links"><a href="hub.html" class="nav-link">&#8592; Hub</a></div>
+        <div class="nav-links"><a href="index.html" class="nav-link">&#8592; Hub</a></div>
     </header>
 
-    <div class="challenge-banner">
-        <strong>Challenge AE-1:</strong> Create a one-shot push button. When pressed once, latch the bulb ON. When pressed again, turn it OFF. 
-        Tags provided: <code>PB_INPUT</code> (toggle this as your push button), <code>BULB_OUT</code> (this should toggle on/off).
-        You'll need to create additional internal tags for edge detection and latching.
+    <div class="challenge-banner" id="challenge-banner">
+        <select id="challenge-select" onchange="loadChallenge(this.value)" style="background:#1a1d29;color:#00d4ff;border:1px solid #333;border-radius:4px;padding:4px 8px;font-size:.75rem;margin-right:8px">
+            <option value="free">Free Build (no challenge)</option>
+            <option value="ae1" selected>AE-1: One-Shot Toggle Latch</option>
+            <option value="ae2">AE-2: Compare 5 Variables — Find Highest</option>
+            <option value="ae4">AE-4: HVAC Heating/Cooling</option>
+            <option value="ae5">AE-5: Bottle Fill Conveyor</option>
+            <option value="ae7">AE-7: Shuttle Motor PE1/PE2</option>
+            <option value="ae9">AE-9: Traffic Light Sequencer</option>
+            <option value="ae12">AE-12: Spiral Package Counter</option>
+            <option value="ae16">AE-16: Pallet Counter</option>
+            <option value="ae18">AE-18: Divisibility Check</option>
+        </select>
+        <span id="challenge-text"><strong>Challenge:</strong> Create a one-shot push button. When pressed once, latch the bulb ON. When pressed again, turn it OFF.</span>
     </div>
 
     <div class="workspace">
