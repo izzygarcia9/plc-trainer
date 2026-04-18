@@ -365,14 +365,20 @@ main {
 
 .wire {
     height: 2px;
-    flex: 0 0 auto;
     background: #555;
-    min-width: 20px;
-    width: 20px;
+    min-width: 12px;
+    width: 12px;
+    flex-shrink: 0;
 }
 
 .wire.energized {
     background: #2ecc71;
+}
+
+.wire.spacer {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 20px;
 }
 
 .ladder-element {

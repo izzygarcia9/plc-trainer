@@ -64,8 +64,7 @@ class LadderRenderer {
 
         // Spacer wire pushes outputs to the right
         const spacer = this.createWire(rung.energized);
-        spacer.style.flex = '1';
-        spacer.style.minWidth = '20px';
+        spacer.classList.add('spacer');
         visual.appendChild(spacer);
 
         // Outputs (right side of rung)

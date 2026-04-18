@@ -91,6 +91,7 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 
 .wire { width:12px; height:2px; background:#333; flex-shrink:0; }
 .wire.energized { background:#2ecc71; }
+.wire.spacer { flex:1 1 auto; width:auto; min-width:20px; }
 
 .drop-hint { border:1px dashed #333; border-radius:3px; padding:8px 12px; color:#444; font-size:.6rem; text-align:center; cursor:default; }
 
@@ -139,3 +140,8 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 
 /* OSR/OSF styling */
 .inst-block.osr, .inst-block.osf { border-color:#27ae60; }
+
+/* Drag and drop */
+.tag-item[draggable="true"] { cursor:grab; }
+.tag-item[draggable="true"]:active { cursor:grabbing; }
+.rung-conditions.drag-over, .rung-outputs.drag-over { background:rgba(0,212,255,.05); }

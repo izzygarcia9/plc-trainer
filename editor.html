@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PLC Fiddle — Ladder Logic Editor</title>
+    <title>Ladder Lab — Ladder Logic Editor</title>
     <link rel="stylesheet" href="editor.css">
 </head>
 <body>
     <header>
-        <h1>&#9889; PLC Fiddle</h1>
+        <h1>&#9889; Ladder Lab</h1>
         <div class="header-controls">
             <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
             <button onclick="singleScan()">&#9193; Scan</button>
@@ -52,6 +52,8 @@
                 <button class="inst-btn coil-btn" onclick="addInst('OTL')" title="Output Latch">&#9472;(L)&#9472; OTL</button>
                 <button class="inst-btn coil-btn" onclick="addInst('OTU')" title="Output Unlatch">&#9472;(U)&#9472; OTU</button>
                 <button class="inst-btn math-btn" onclick="addInst('TON')" title="Timer On-Delay">TON</button>
+                <button class="inst-btn math-btn" onclick="addInst('CTU')" title="Count Up">CTU</button>
+                <button class="inst-btn math-btn" onclick="addInst('CTD')" title="Count Down">CTD</button>
                 <button class="inst-btn math-btn" onclick="addInst('MOV')" title="Move">MOV</button>
                 <button class="inst-btn math-btn" onclick="addInst('ADD')" title="Add">ADD</button>
                 <button class="inst-btn math-btn" onclick="addInst('SUB')" title="Subtract">SUB</button>

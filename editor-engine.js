@@ -127,6 +127,12 @@ const EditorPLC = {
             case 'TON':  // Timer on-delay
                 this.evalTON(inst, power);
                 break;
+            case 'CTU':  // Count up
+                this.evalCTU(inst, power);
+                break;
+            case 'CTD':  // Count down
+                this.evalCTD(inst, power);
+                break;
             case 'MOV':
                 if (power) this.setTag(inst.tag, this.getTag(inst.tag2));
                 break;
@@ -176,6 +182,29 @@ const EditorPLC = {
         const done = t.acc >= pre;
         this.setTag(inst.tag + '_TT', !done);
         this.setTag(inst.tag + '_DN', done);
+    },
+
+    evalCTU(inst, power) {
+        const key = inst.id || inst.tag;
+        if (!this.timerAccs[key]) this.timerAccs[key] = { acc: 0, prev: false };
+        const t = this.timerAccs[key];
+        const pre = inst.preset || 10;
+        // Count on rising edge of power
+        if (power && !t.prev) { t.acc++; }
+        t.prev = power;
+        this.setTag(inst.tag + '_ACC', t.acc);
+        this.setTag(inst.tag + '_DN', t.acc >= pre);
+    },
+
+    evalCTD(inst, power) {
+        const key = inst.id || inst.tag;
+        if (!this.timerAccs[key]) this.timerAccs[key] = { acc: 0, prev: false };
+        const t = this.timerAccs[key];
+        // Count down on rising edge of power
+        if (power && !t.prev) { t.acc = Math.max(0, t.acc - 1); }
+        t.prev = power;
+        this.setTag(inst.tag + '_ACC', t.acc);
+        this.setTag(inst.tag + '_DN', t.acc <= 0);
     },
 
     onChange(cb) { this.listeners.push(cb); },

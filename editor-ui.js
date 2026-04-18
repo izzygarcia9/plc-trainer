@@ -68,9 +68,11 @@ function renderTagPanel() {
     const list = document.getElementById('tag-list');
     list.innerHTML = '';
     for (const [name, tag] of Object.entries(EditorPLC.tags)) {
-        if (name.endsWith('_EN') || name.endsWith('_TT') || name.endsWith('_DN') || name.endsWith('_ACC')) continue;
+        if (name.endsWith('_EN') || name.endsWith('_TT') || name.endsWith('_DN') || name.endsWith('_ACC') || name.endsWith('_prev') || name.startsWith('_CONST_')) continue;
         const div = document.createElement('div');
         div.className = 'tag-item';
+        div.draggable = true;
+        div.ondragstart = (e) => { e.dataTransfer.setData('text/plain', name); e.dataTransfer.effectAllowed = 'copy'; };
         const isBool = tag.type === 'BOOL';
         div.innerHTML = `
             <div class="tag-toggle ${tag.value ? 'on' : ''}" onclick="EditorPLC.toggleTag('${name}');renderAll()"></div>
@@ -117,7 +119,7 @@ function addInst(type) {
     const rung = EditorPLC.rungs[selectedRungIdx];
     if (!rung) return;
 
-    const isOutput = ['OTE', 'OTL', 'OTU', 'TON', 'MOV', 'ADD', 'SUB', 'MUL', 'DIV'].includes(type);
+    const isOutput = ['OTE', 'OTL', 'OTU', 'TON', 'CTU', 'CTD', 'MOV', 'ADD', 'SUB', 'MUL', 'DIV'].includes(type);
     const isCondition = ['XIC', 'XIO', 'GRT', 'LES', 'EQU'].includes(type);
 
     const inst = { type, tag: '', id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
@@ -128,6 +130,7 @@ function addInst(type) {
     if (['ADD', 'SUB', 'MUL', 'DIV'].includes(type)) { inst.tag2 = ''; inst.tag3 = ''; }
     if (type === 'MOV') inst.tag2 = '';
     if (type === 'TON') inst.preset = 5;
+    if (type === 'CTU' || type === 'CTD') inst.preset = 10;
 
     if (isOutput) {
         rung.outputs.push(inst);
@@ -138,6 +141,23 @@ function addInst(type) {
     renderRungs();
     // Auto-open tag picker for the new instruction
     pickTag(inst.id, 'tag');
+}
+
+// ─── Drag & Drop from Tag Panel ───
+function dropTagOnRung(e, rungIdx, side) {
+    const tagName = e.dataTransfer.getData('text/plain');
+    if (!tagName || !EditorPLC.tags[tagName]) return;
+
+    const rung = EditorPLC.rungs[rungIdx];
+    const tag = EditorPLC.tags[tagName];
+    const inst = { type: side === 'cond' ? 'XIC' : 'OTE', tag: tagName, id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
+
+    if (side === 'cond') {
+        rung.conditions.push(inst);
+    } else {
+        rung.outputs.push(inst);
+    }
+    renderRungs();
 }
 
 // ─── Tag Picker Modal ───
@@ -232,8 +252,11 @@ function renderRungs() {
         // Conditions
         const condDiv = document.createElement('div');
         condDiv.className = 'rung-conditions';
+        condDiv.ondragover = (e) => { e.preventDefault(); condDiv.style.background = 'rgba(0,212,255,.05)'; };
+        condDiv.ondragleave = () => { condDiv.style.background = ''; };
+        condDiv.ondrop = (e) => { e.preventDefault(); condDiv.style.background = ''; dropTagOnRung(e, ri, 'cond'); };
         if (rung.conditions.length === 0) {
-            condDiv.innerHTML = '<div class="drop-hint">Click an instruction above to add</div>';
+            condDiv.innerHTML = '<div class="drop-hint">Drag a tag here or click instruction above</div>';
         }
         rung.conditions.forEach((inst, ii) => {
             if (ii > 0) condDiv.appendChild(makeWire(rung.energized));
@@ -269,15 +292,17 @@ function renderRungs() {
 
         // Wire between conditions and outputs (stretches to fill gap)
         const midWire = makeWire(rung.energized);
-        midWire.style.flex = '1';
-        midWire.style.minWidth = '20px';
+        midWire.classList.add('spacer');
         row.appendChild(midWire);
 
         // Outputs
         const outDiv = document.createElement('div');
         outDiv.className = 'rung-outputs';
+        outDiv.ondragover = (e) => { e.preventDefault(); outDiv.style.background = 'rgba(230,126,34,.05)'; };
+        outDiv.ondragleave = () => { outDiv.style.background = ''; };
+        outDiv.ondrop = (e) => { e.preventDefault(); outDiv.style.background = ''; dropTagOnRung(e, ri, 'out'); };
         if (rung.outputs.length === 0) {
-            outDiv.innerHTML = '<div class="drop-hint">Add output</div>';
+            outDiv.innerHTML = '<div class="drop-hint">Drag tag here for output</div>';
         }
         rung.outputs.forEach((inst, ii) => {
             outDiv.appendChild(makeInstBlock(inst, ri, 'out', ii, rung.energized));
@@ -339,7 +364,11 @@ function makeInstBlock(inst, rungIdx, side, instIdx, energized) {
     }
     if (inst.type === 'TON') {
         const acc = EditorPLC.getTag(inst.tag + '_ACC') || 0;
-        extraHtml = `<div class="inst-extra">PRE=${inst.preset} ACC=${acc}</div>`;
+        extraHtml = `<div class="inst-extra">PRE=<span class="inst-tag" onclick="event.stopPropagation();editTimerPreset('${inst.id}')">${inst.preset || 5}</span> ACC=${acc}</div>`;
+    }
+    if (inst.type === 'CTU' || inst.type === 'CTD') {
+        const acc = EditorPLC.getTag(inst.tag + '_ACC') || 0;
+        extraHtml = `<div class="inst-extra">PRE=<span class="inst-tag" onclick="event.stopPropagation();editTimerPreset('${inst.id}')">${inst.preset || 10}</span> ACC=${acc}</div>`;
     }
 
     div.innerHTML = `
