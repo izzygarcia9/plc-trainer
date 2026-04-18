@@ -82,8 +82,8 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 /* Contact styles */
 .inst-block.xic { border-color:#3498db; }
 .inst-block.xio { border-color:#9b59b6; }
-.inst-block.ote, .inst-block.otl, .inst-block.otu { border-color:#e67e22; }
-.inst-block.ton { border-color:#3498db; min-width:80px; }
+.inst-block.ote, .inst-block.otl, .inst-block.otu { border-color:#e67e22; border-radius:20px; width:65px; height:42px; justify-content:center; }
+.inst-block.ton, .inst-block.ctu, .inst-block.ctd { border-color:#3498db; min-width:80px; }
 .inst-block.mov,.inst-block.add,.inst-block.sub,.inst-block.mul,.inst-block.div { border-color:#3498db; min-width:70px; }
 .inst-block.grt,.inst-block.les,.inst-block.equ { border-color:#9b59b6; }
 

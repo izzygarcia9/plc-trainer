@@ -145,11 +145,12 @@ function addInst(type) {
 
 // ─── Drag & Drop from Tag Panel ───
 function dropTagOnRung(e, rungIdx, side) {
+    e.preventDefault();
+    e.stopPropagation();
     const tagName = e.dataTransfer.getData('text/plain');
     if (!tagName || !EditorPLC.tags[tagName]) return;
 
     const rung = EditorPLC.rungs[rungIdx];
-    const tag = EditorPLC.tags[tagName];
     const inst = { type: side === 'cond' ? 'XIC' : 'OTE', tag: tagName, id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
 
     if (side === 'cond') {
@@ -159,6 +160,37 @@ function dropTagOnRung(e, rungIdx, side) {
     }
     renderRungs();
 }
+
+// Global drag-over handler to allow drops
+document.addEventListener('dragover', (e) => {
+    if (e.target.closest && (e.target.closest('.rung-conditions') || e.target.closest('.rung-outputs'))) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    }
+});
+
+document.addEventListener('drop', (e) => {
+    const condTarget = e.target.closest ? e.target.closest('.rung-conditions') : null;
+    const outTarget = e.target.closest ? e.target.closest('.rung-outputs') : null;
+    if (!condTarget && !outTarget) return;
+    e.preventDefault();
+    const tagName = e.dataTransfer.getData('text/plain');
+    if (!tagName || !EditorPLC.tags[tagName]) return;
+
+    // Find which rung this belongs to
+    const rungRow = (condTarget || outTarget).closest('.rung-row');
+    if (!rungRow) return;
+    const rungIdx = Array.from(document.querySelectorAll('.rung-row')).indexOf(rungRow);
+    if (rungIdx < 0) return;
+
+    const side = condTarget ? 'cond' : 'out';
+    const rung = EditorPLC.rungs[rungIdx];
+    const inst = { type: side === 'cond' ? 'XIC' : 'OTE', tag: tagName, id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
+
+    if (side === 'cond') rung.conditions.push(inst);
+    else rung.outputs.push(inst);
+    renderRungs();
+});
 
 // ─── Tag Picker Modal ───
 let pendingPickInstId = null;
@@ -407,9 +439,13 @@ function showInstMenu(e, inst, rungIdx, side, instIdx) {
         items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','OTU')">&#9472;(U)&#9472; OTU (Unlatch)</div>`;
     }
 
-    // Timer parameters
+    // Timer/Counter parameters
     if (inst.type === 'TON') {
-        items += `<div class="ctx-item" onclick="editTimerPreset('${inst.id}')">&#9201; Set Preset (current: ${inst.preset || 5})</div>`;
+        items += `<div class="ctx-item" onclick="editTimerPreset('${inst.id}')">&#9201; Set Timer Preset (current: ${inst.preset || 5})</div>`;
+    }
+    if (inst.type === 'CTU' || inst.type === 'CTD') {
+        items += `<div class="ctx-item" onclick="editTimerPreset('${inst.id}')">&#128290; Set Counter Preset (current: ${inst.preset || 10})</div>`;
+        items += `<div class="ctx-item" onclick="resetCounter('${inst.id}')">&#8634; Reset Counter ACC</div>`;
     }
 
     // Compare type changes
@@ -459,7 +495,7 @@ function changeInstType(instId, newType) {
 }
 
 function editTimerPreset(instId) {
-    const val = prompt('Enter timer preset (seconds):', '5');
+    const val = prompt('Enter preset value:', '5');
     if (val === null) return;
     const num = parseInt(val);
     if (isNaN(num) || num < 1) { alert('Must be a positive number'); return; }
@@ -470,6 +506,22 @@ function editTimerPreset(instId) {
     }
     closeInstMenu();
     renderRungs();
+}
+
+function resetCounter(instId) {
+    for (const rung of EditorPLC.rungs) {
+        for (const inst of [...rung.conditions, ...rung.outputs]) {
+            if (inst.id === instId) {
+                const key = inst.id || inst.tag;
+                if (EditorPLC.timerAccs[key]) EditorPLC.timerAccs[key].acc = 0;
+                EditorPLC.setTag(inst.tag + '_ACC', 0);
+                EditorPLC.setTag(inst.tag + '_DN', false);
+                break;
+            }
+        }
+    }
+    closeInstMenu();
+    renderAll();
 }
 
 // ─── Branch Support ───
