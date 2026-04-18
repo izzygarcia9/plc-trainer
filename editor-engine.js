@@ -60,11 +60,24 @@ const EditorPLC = {
     },
 
     evalRung(rung) {
-        // Evaluate conditions left-to-right (series AND)
-        let power = true;
+        // Evaluate main conditions left-to-right (series AND)
+        let mainPower = true;
         for (const inst of rung.conditions) {
-            power = power && this.evalCondition(inst);
+            mainPower = mainPower && this.evalCondition(inst);
         }
+
+        // Evaluate branches (parallel OR paths)
+        let power = mainPower;
+        if (rung.branches && rung.branches.length > 0) {
+            for (const branch of rung.branches) {
+                let branchPower = true;
+                for (const inst of branch.conditions) {
+                    branchPower = branchPower && this.evalCondition(inst);
+                }
+                power = power || branchPower;  // OR with main path
+            }
+        }
+
         rung.energized = power;
 
         // If power flows, execute outputs
@@ -78,9 +91,24 @@ const EditorPLC = {
         switch (inst.type) {
             case 'XIC': return !!val;                    // Examine if closed (NO)
             case 'XIO': return !val;                     // Examine if open (NC)
+            case 'OSR': {                                // One-shot rising
+                const prev = this.getTag(inst.tag + '_prev');
+                const cur = !!val;
+                this.setTag(inst.tag + '_prev', cur);
+                return cur && !prev;
+            }
+            case 'OSF': {                                // One-shot falling
+                const prev = this.getTag(inst.tag + '_prev');
+                const cur = !!val;
+                this.setTag(inst.tag + '_prev', cur);
+                return !cur && prev;
+            }
             case 'GRT': return this.getTag(inst.tag) > this.getTag(inst.tag2 || '__zero');
             case 'LES': return this.getTag(inst.tag) < this.getTag(inst.tag2 || '__zero');
             case 'EQU': return this.getTag(inst.tag) === this.getTag(inst.tag2 || '__zero');
+            case 'GEQ': return this.getTag(inst.tag) >= this.getTag(inst.tag2 || '__zero');
+            case 'LEQ': return this.getTag(inst.tag) <= this.getTag(inst.tag2 || '__zero');
+            case 'NEQ': return this.getTag(inst.tag) !== this.getTag(inst.tag2 || '__zero');
             default: return true;
         }
     },

@@ -365,9 +365,10 @@ main {
 
 .wire {
     height: 2px;
-    flex: 1;
+    flex: 0 0 auto;
     background: #555;
     min-width: 20px;
+    width: 20px;
 }
 
 .wire.energized {

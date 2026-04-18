@@ -140,13 +140,6 @@ function addInst(type) {
     pickTag(inst.id, 'tag');
 }
 
-function removeInst(rungIdx, side, instIdx) {
-    const rung = EditorPLC.rungs[rungIdx];
-    if (side === 'cond') rung.conditions.splice(instIdx, 1);
-    else rung.outputs.splice(instIdx, 1);
-    renderRungs();
-}
-
 // ─── Tag Picker Modal ───
 let pendingPickInstId = null;
 let pendingPickField = null;
@@ -248,6 +241,32 @@ function renderRungs() {
         });
         row.appendChild(condDiv);
 
+        // Render branches (parallel paths)
+        if (rung.branches && rung.branches.length > 0) {
+            const branchContainer = document.createElement('div');
+            branchContainer.className = 'branch-container';
+            rung.branches.forEach((branch, bi) => {
+                const branchDiv = document.createElement('div');
+                branchDiv.className = 'branch-path';
+                branch.conditions.forEach((inst, ii) => {
+                    if (ii > 0) branchDiv.appendChild(makeWire(rung.energized));
+                    branchDiv.appendChild(makeInstBlock(inst, ri, 'branch_' + bi, ii, rung.energized));
+                });
+                if (branch.conditions.length === 0) {
+                    branchDiv.innerHTML = '<div class="drop-hint" style="font-size:.55rem">Click instruction to add to branch</div>';
+                }
+                // Add instruction to branch button
+                const addBtn = document.createElement('button');
+                addBtn.className = 'branch-add-btn';
+                addBtn.textContent = '+';
+                addBtn.title = 'Add instruction to this branch';
+                addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, bi); };
+                branchDiv.appendChild(addBtn);
+                branchContainer.appendChild(branchDiv);
+            });
+            row.appendChild(branchContainer);
+        }
+
         // Wire between conditions and outputs (stretches to fill gap)
         const midWire = makeWire(rung.energized);
         midWire.style.flex = '1';
@@ -295,14 +314,17 @@ function makeInstBlock(inst, rungIdx, side, instIdx, energized) {
     switch (inst.type) {
         case 'XIC': symbol = '─] [─'; break;
         case 'XIO': symbol = '─]/[─'; break;
+        case 'OSR': symbol = '─[OSR]─'; break;
+        case 'OSF': symbol = '─[OSF]─'; break;
         case 'OTE': symbol = '─( )─'; break;
         case 'OTL': symbol = '─(L)─'; break;
         case 'OTU': symbol = '─(U)─'; break;
     }
 
     let extraHtml = '';
-    if (['GRT', 'LES', 'EQU'].includes(inst.type)) {
-        const op = inst.type === 'GRT' ? '>' : inst.type === 'LES' ? '<' : '=';
+    if (['GRT', 'LES', 'EQU', 'GEQ', 'LEQ', 'NEQ'].includes(inst.type)) {
+        const ops = {GRT:'>',LES:'<',EQU:'=',GEQ:'>=',LEQ:'<=',NEQ:'≠'};
+        const op = ops[inst.type] || '?';
         extraHtml = `<div class="inst-extra">${op} <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${inst.tag2 || '???'}</span></div>`;
     }
     if (['ADD', 'SUB', 'MUL', 'DIV'].includes(inst.type)) {
@@ -326,7 +348,129 @@ function makeInstBlock(inst, rungIdx, side, instIdx, energized) {
         ${extraHtml}
         <div class="inst-del" onclick="event.stopPropagation();removeInst(${rungIdx},'${side}',${instIdx})">&times;</div>
     `;
+    div.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); showInstMenu(e, inst, rungIdx, side, instIdx); };
     return div;
+}
+
+// ─── Right-Click Context Menu ───
+function showInstMenu(e, inst, rungIdx, side, instIdx) {
+    closeInstMenu();
+    const menu = document.createElement('div');
+    menu.className = 'ctx-menu';
+    menu.id = 'ctx-menu';
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+
+    let items = '';
+
+    // Contact type changes
+    if (['XIC','XIO'].includes(inst.type)) {
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','XIC')">&#9472;] [&#9472; XIC (NO)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','XIO')">&#9472;]/[&#9472; XIO (NC)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','OSR')">&#8593; OSR (Rising)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','OSF')">&#8595; OSF (Falling)</div>`;
+    }
+
+    // Output type changes
+    if (['OTE','OTL','OTU'].includes(inst.type)) {
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','OTE')">&#9472;( )&#9472; OTE (Coil)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','OTL')">&#9472;(L)&#9472; OTL (Latch)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','OTU')">&#9472;(U)&#9472; OTU (Unlatch)</div>`;
+    }
+
+    // Timer parameters
+    if (inst.type === 'TON') {
+        items += `<div class="ctx-item" onclick="editTimerPreset('${inst.id}')">&#9201; Set Preset (current: ${inst.preset || 5})</div>`;
+    }
+
+    // Compare type changes
+    if (['GRT','LES','EQU'].includes(inst.type)) {
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','GRT')">GRT (&gt;)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','LES')">LES (&lt;)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','EQU')">EQU (=)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','GEQ')">GEQ (&gt;=)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','LEQ')">LEQ (&lt;=)</div>`;
+        items += `<div class="ctx-item" onclick="changeInstType('${inst.id}','NEQ')">NEQ (&ne;)</div>`;
+    }
+
+    // Common actions
+    items += `<div class="ctx-sep"></div>`;
+    items += `<div class="ctx-item" onclick="pickTag('${inst.id}','tag')">Change Tag</div>`;
+    items += `<div class="ctx-item ctx-danger" onclick="removeInst(${rungIdx},'${side}',${instIdx});closeInstMenu()">Delete</div>`;
+
+    // Branch option (only for conditions)
+    if (side === 'cond') {
+        items += `<div class="ctx-sep"></div>`;
+        items += `<div class="ctx-item" onclick="addBranch(${rungIdx})">Add Branch (parallel)</div>`;
+    }
+
+    menu.innerHTML = items;
+    document.body.appendChild(menu);
+    setTimeout(() => document.addEventListener('click', closeInstMenu, { once: true }), 10);
+}
+
+function closeInstMenu() {
+    const m = document.getElementById('ctx-menu');
+    if (m) m.remove();
+}
+
+function changeInstType(instId, newType) {
+    for (const rung of EditorPLC.rungs) {
+        for (const inst of [...rung.conditions, ...rung.outputs]) {
+            if (inst.id === instId) {
+                inst.type = newType;
+                // Add tag2 for compare types if missing
+                if (['GRT','LES','EQU','GEQ','LEQ','NEQ'].includes(newType) && !inst.tag2) inst.tag2 = '';
+                break;
+            }
+        }
+    }
+    closeInstMenu();
+    renderRungs();
+}
+
+function editTimerPreset(instId) {
+    const val = prompt('Enter timer preset (seconds):', '5');
+    if (val === null) return;
+    const num = parseInt(val);
+    if (isNaN(num) || num < 1) { alert('Must be a positive number'); return; }
+    for (const rung of EditorPLC.rungs) {
+        for (const inst of [...rung.conditions, ...rung.outputs]) {
+            if (inst.id === instId) { inst.preset = num; break; }
+        }
+    }
+    closeInstMenu();
+    renderRungs();
+}
+
+// ─── Branch Support ───
+function addBranch(rungIdx) {
+    const rung = EditorPLC.rungs[rungIdx];
+    if (!rung.branches) rung.branches = [];
+    rung.branches.push({ conditions: [] });
+    closeInstMenu();
+    renderRungs();
+}
+
+function addInstToBranch(rungIdx, branchIdx) {
+    const rung = EditorPLC.rungs[rungIdx];
+    const branch = rung.branches[branchIdx];
+    const inst = { type: 'XIC', tag: '', id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
+    branch.conditions.push(inst);
+    renderRungs();
+    pickTag(inst.id, 'tag');
+}
+
+function removeInst(rungIdx, side, instIdx) {
+    const rung = EditorPLC.rungs[rungIdx];
+    if (side === 'cond') rung.conditions.splice(instIdx, 1);
+    else if (side.startsWith('branch_')) {
+        const bi = parseInt(side.split('_')[1]);
+        rung.branches[bi].conditions.splice(instIdx, 1);
+        if (rung.branches[bi].conditions.length === 0) rung.branches.splice(bi, 1);
+    }
+    else rung.outputs.splice(instIdx, 1);
+    renderRungs();
 }
 
 // ─── Scan Controls ───
