@@ -21,13 +21,16 @@ const EditorPLC = {
     },
 
     getTag(name) {
-        const t = this.tags[name];
+        // Support dot notation: T1.DN → T1_DN, T1.EN → T1_EN, etc.
+        const resolved = name ? name.replace(/\./g, '_') : name;
+        const t = this.tags[resolved];
         return t ? t.value : 0;
     },
 
     setTag(name, value) {
-        if (this.tags[name]) {
-            this.tags[name].value = value;
+        const resolved = name ? name.replace(/\./g, '_') : name;
+        if (this.tags[resolved]) {
+            this.tags[resolved].value = value;
         }
     },
 

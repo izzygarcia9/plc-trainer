@@ -44,7 +44,7 @@ function initChallenge() {
 function addTagPrompt() {
     const name = prompt('Tag name (e.g. MY_TAG):');
     if (!name || !name.trim()) return;
-    const clean = name.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '');
+    const clean = name.trim().toUpperCase().replace(/[^A-Z0-9_.]/g, '');
     if (EditorPLC.tags[clean]) { alert('Tag already exists'); return; }
     const type = prompt('Type: BOOL or INT', 'BOOL');
     const t = (type || 'BOOL').toUpperCase().trim();
@@ -206,9 +206,27 @@ function pickTag(instId, field) {
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
     const tags = Object.keys(EditorPLC.tags);
-    let listHtml = tags.map(t =>
-        `<div class="tag-pick-item" onclick="applyTagPick('${t}')">${t} <span style="color:#555;font-size:.6rem">(${EditorPLC.tags[t].type})</span></div>`
-    ).join('');
+    // Build tag list with dot-notation sub-tags for timers/counters
+    let allTags = [];
+    for (const t of tags) {
+        allTags.push(t);
+        // If this tag has timer/counter sub-tags, add dot-notation versions
+        if (EditorPLC.tags[t + '_EN']) {
+            allTags.push(t + '.EN');
+            if (EditorPLC.tags[t + '_TT']) allTags.push(t + '.TT');
+            allTags.push(t + '.DN');
+            allTags.push(t + '.ACC');
+        }
+    }
+    // Remove internal underscore versions from display
+    allTags = allTags.filter(t => !t.endsWith('_EN') && !t.endsWith('_TT') && !t.endsWith('_DN') && !t.endsWith('_ACC') && !t.endsWith('_prev') && !t.startsWith('_CONST_'));
+
+    let listHtml = allTags.map(t => {
+        const resolved = t.replace(/\./g, '_');
+        const tagObj = EditorPLC.tags[resolved];
+        const typeStr = tagObj ? tagObj.type : 'BOOL';
+        return `<div class="tag-pick-item" onclick="applyTagPick('${t}')">${t} <span style="color:#555;font-size:.6rem">(${typeStr})</span></div>`;
+    }).join('');
 
     overlay.innerHTML = `
         <div class="modal">
@@ -245,8 +263,10 @@ function applyTagPickManual() {
         if (!EditorPLC.tags[constName]) EditorPLC.defineTag(constName, 'INT', parseInt(val));
         setInstField(pendingPickInstId, pendingPickField, constName);
     } else {
-        // Auto-create tag if it doesn't exist
-        if (!EditorPLC.tags[val]) {
+        // Support dot notation — resolve to underscore for storage but keep dot for display
+        const resolved = val.replace(/\./g, '_');
+        // Auto-create tag if it doesn't exist (only for base tags, not sub-tags)
+        if (!EditorPLC.tags[resolved] && !val.includes('.')) {
             EditorPLC.defineTag(val, 'BOOL', false);
         }
         setInstField(pendingPickInstId, pendingPickField, val);
