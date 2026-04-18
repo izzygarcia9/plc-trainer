@@ -62,7 +62,13 @@ class LadderRenderer {
             ));
         });
 
-        // Outputs
+        // Spacer wire pushes outputs to the right
+        const spacer = this.createWire(rung.energized);
+        spacer.style.flex = '1';
+        spacer.style.minWidth = '20px';
+        visual.appendChild(spacer);
+
+        // Outputs (right side of rung)
         rung.outputs.forEach((out, idx) => {
             const el = this.createLadderElement(out, rung.outputStates[idx]);
             visual.appendChild(el);

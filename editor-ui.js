@@ -248,8 +248,11 @@ function renderRungs() {
         });
         row.appendChild(condDiv);
 
-        // Wire between conditions and outputs
-        row.appendChild(makeWire(rung.energized));
+        // Wire between conditions and outputs (stretches to fill gap)
+        const midWire = makeWire(rung.energized);
+        midWire.style.flex = '1';
+        midWire.style.minWidth = '20px';
+        row.appendChild(midWire);
 
         // Outputs
         const outDiv = document.createElement('div');
