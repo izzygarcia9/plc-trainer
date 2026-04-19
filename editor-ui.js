@@ -346,52 +346,62 @@ function renderRungs() {
             condDiv.appendChild(makeWire(rung.energized));
 
             if (hasBranches) {
-                // Build a branch group: inline block with main-path conditions on top, branches below
+                // Build branch group as a table-like structure with vertical wires
                 const branchGroup = document.createElement('div');
-                branchGroup.className = 'branch-group has-branches';
+                branchGroup.className = 'branch-group';
 
-                // Top path (main conditions inside the parallel group)
-                const topPath = document.createElement('div');
-                topPath.className = 'branch-group-path';
-                rung.conditions.forEach((inst, ii) => {
-                    topPath.appendChild(makeInstBlock(inst, ri, 'cond', ii, rung.energized));
-                    topPath.appendChild(makeWire(rung.energized));
-                });
-                if (rung.conditions.length === 0) {
-                    const w = makeWire(rung.energized);
-                    w.style.minWidth = '40px';
-                    w.classList.add('spacer');
-                    topPath.appendChild(w);
-                }
-                branchGroup.appendChild(topPath);
+                // All paths: main conditions + each branch
+                const allPaths = [rung.conditions, ...rung.branches.map(b => b.conditions)];
+                const pathSides = ['cond', ...rung.branches.map((_, bi) => 'branch_' + bi)];
 
-                // Each branch path below
-                rung.branches.forEach((branch, bi) => {
-                    const branchPath = document.createElement('div');
-                    branchPath.className = 'branch-group-path';
-                    branch.conditions.forEach((inst, ii) => {
-                        branchPath.appendChild(makeInstBlock(inst, ri, 'branch_' + bi, ii, rung.energized));
-                        branchPath.appendChild(makeWire(rung.energized));
+                allPaths.forEach((pathInsts, pi) => {
+                    const pathRow = document.createElement('div');
+                    pathRow.className = 'branch-row';
+
+                    // Left vertical wire segment (connects to path above/below)
+                    const vLeft = document.createElement('div');
+                    vLeft.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
+                    if (pi === 0) vLeft.classList.add('vwire-top');
+                    if (pi === allPaths.length - 1) vLeft.classList.add('vwire-bottom');
+                    pathRow.appendChild(vLeft);
+
+                    // Horizontal path with instructions
+                    const hPath = document.createElement('div');
+                    hPath.className = 'branch-hpath';
+                    pathInsts.forEach((inst, ii) => {
+                        hPath.appendChild(makeWire(rung.energized));
+                        hPath.appendChild(makeInstBlock(inst, ri, pathSides[pi], ii, rung.energized));
                     });
-                    if (branch.conditions.length === 0) {
+                    if (pathInsts.length === 0 && pi > 0) {
                         const hint = document.createElement('div');
                         hint.className = 'drop-hint';
                         hint.style.fontSize = '.55rem';
                         hint.style.padding = '4px 6px';
                         hint.textContent = '+ add';
                         hint.style.cursor = 'pointer';
-                        hint.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, bi); };
-                        branchPath.appendChild(hint);
+                        hint.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, pi - 1); };
+                        hPath.appendChild(hint);
                     }
-                    // Add instruction button for branch
-                    const addBtn = document.createElement('button');
-                    addBtn.className = 'branch-add-btn';
-                    addBtn.textContent = '+';
-                    addBtn.title = 'Add instruction to this branch';
-                    addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, bi); };
-                    branchPath.appendChild(addBtn);
+                    hPath.appendChild(makeWire(rung.energized));
+                    // Add button for branch paths
+                    if (pi > 0) {
+                        const addBtn = document.createElement('button');
+                        addBtn.className = 'branch-add-btn';
+                        addBtn.textContent = '+';
+                        addBtn.title = 'Add instruction to this branch';
+                        addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, pi - 1); };
+                        hPath.appendChild(addBtn);
+                    }
+                    pathRow.appendChild(hPath);
 
-                    branchGroup.appendChild(branchPath);
+                    // Right vertical wire segment
+                    const vRight = document.createElement('div');
+                    vRight.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
+                    if (pi === 0) vRight.classList.add('vwire-top');
+                    if (pi === allPaths.length - 1) vRight.classList.add('vwire-bottom');
+                    pathRow.appendChild(vRight);
+
+                    branchGroup.appendChild(pathRow);
                 });
 
                 condDiv.appendChild(branchGroup);
@@ -429,45 +439,54 @@ function renderRungs() {
         outDiv.ondrop = (e) => { e.preventDefault(); outDiv.style.background = ''; dropTagOnRung(e, ri, 'out'); };
 
         if (hasOutputBranches) {
-            // Render as output branch group (stacked vertically)
+            // Render as output branch group with vertical wires
             const outGroup = document.createElement('div');
-            outGroup.className = 'branch-group has-branches';
+            outGroup.className = 'branch-group';
 
-            // Top path = main outputs
-            const topPath = document.createElement('div');
-            topPath.className = 'branch-group-path';
-            rung.outputs.forEach((inst, ii) => {
-                topPath.appendChild(makeInstBlock(inst, ri, 'out', ii, rung.energized));
-            });
-            if (rung.outputs.length === 0) {
-                topPath.innerHTML = '<div class="drop-hint" style="font-size:.55rem;padding:4px 6px">+ add output</div>';
-            }
-            outGroup.appendChild(topPath);
+            const allOutPaths = [rung.outputs, ...rung.outputBranches.map(b => b.outputs)];
+            const outSides = ['out', ...rung.outputBranches.map((_, bi) => 'outbranch_' + bi)];
 
-            // Each output branch below
-            rung.outputBranches.forEach((branch, bi) => {
-                const branchPath = document.createElement('div');
-                branchPath.className = 'branch-group-path';
-                branch.outputs.forEach((inst, ii) => {
-                    branchPath.appendChild(makeInstBlock(inst, ri, 'outbranch_' + bi, ii, rung.energized));
+            allOutPaths.forEach((pathInsts, pi) => {
+                const pathRow = document.createElement('div');
+                pathRow.className = 'branch-row';
+
+                const vLeft = document.createElement('div');
+                vLeft.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
+                if (pi === 0) vLeft.classList.add('vwire-top');
+                if (pi === allOutPaths.length - 1) vLeft.classList.add('vwire-bottom');
+                pathRow.appendChild(vLeft);
+
+                const hPath = document.createElement('div');
+                hPath.className = 'branch-hpath';
+                pathInsts.forEach((inst, ii) => {
+                    hPath.appendChild(makeInstBlock(inst, ri, outSides[pi], ii, rung.energized));
                 });
-                if (branch.outputs.length === 0) {
+                if (pathInsts.length === 0 && pi > 0) {
                     const hint = document.createElement('div');
                     hint.className = 'drop-hint';
                     hint.style.fontSize = '.55rem';
                     hint.style.padding = '4px 6px';
                     hint.textContent = '+ add';
                     hint.style.cursor = 'pointer';
-                    hint.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, bi); };
-                    branchPath.appendChild(hint);
+                    hint.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, pi - 1); };
+                    hPath.appendChild(hint);
                 }
-                const addBtn = document.createElement('button');
-                addBtn.className = 'branch-add-btn';
-                addBtn.textContent = '+';
-                addBtn.title = 'Add output to this branch';
-                addBtn.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, bi); };
-                branchPath.appendChild(addBtn);
-                outGroup.appendChild(branchPath);
+                if (pi > 0) {
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'branch-add-btn';
+                    addBtn.textContent = '+';
+                    addBtn.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, pi - 1); };
+                    hPath.appendChild(addBtn);
+                }
+                pathRow.appendChild(hPath);
+
+                const vRight = document.createElement('div');
+                vRight.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
+                if (pi === 0) vRight.classList.add('vwire-top');
+                if (pi === allOutPaths.length - 1) vRight.classList.add('vwire-bottom');
+                pathRow.appendChild(vRight);
+
+                outGroup.appendChild(pathRow);
             });
 
             outDiv.appendChild(outGroup);
@@ -812,8 +831,8 @@ function lightUpdate() {
         row.querySelectorAll('.rung-rail').forEach(r => { if (rung.energized) r.classList.add('energized'); else r.classList.remove('energized'); });
         // Update wires
         row.querySelectorAll('.wire').forEach(w => { if (rung.energized) w.classList.add('energized'); else w.classList.remove('energized'); });
-        // Update branch group border
-        row.querySelectorAll('.branch-group').forEach(bg => { /* CSS handles via .rung-row.energized */ });
+        // Update branch vertical wires
+        row.querySelectorAll('.branch-vwire').forEach(v => { if (rung.energized) v.classList.add('energized'); else v.classList.remove('energized'); });
         // Update instruction blocks
         row.querySelectorAll('.inst-block').forEach(ib => { if (rung.energized) ib.classList.add('energized'); else ib.classList.remove('energized'); });
     });

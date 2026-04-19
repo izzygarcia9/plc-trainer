@@ -134,14 +134,24 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 /* Rung conditions — horizontal flow of wires, instructions, and branch groups */
 .rung-conditions { display:flex; align-items:flex-start; gap:2px; padding:4px; min-height:44px; flex:1; }
 
-/* Branch group — inline block, only as wide as its content */
-.branch-group { display:inline-flex; flex-direction:column; flex-shrink:0; flex-grow:0;
-    border-left:2px solid #555; border-right:2px solid #555;
-    margin:0 2px; width:fit-content; }
-.rung-row.energized .branch-group { border-color:#2ecc71; }
+/* Branch group — stacks rows vertically, each row has [vwire | hpath | vwire] */
+.branch-group { display:inline-flex; flex-direction:column; flex-shrink:0; flex-grow:0; }
 
-/* Each path row inside the branch group */
-.branch-group-path { display:flex; align-items:center; gap:2px; padding:4px 6px; min-height:44px; width:fit-content; }
+/* Each branch row: left-vwire + horizontal-path + right-vwire */
+.branch-row { display:flex; align-items:stretch; }
+
+/* Vertical wire segments connecting paths */
+.branch-vwire { width:2px; background:#555; flex-shrink:0; }
+.branch-vwire.energized { background:#2ecc71; }
+/* Top path: vertical wire only extends from middle down */
+.branch-vwire.vwire-top { background:linear-gradient(to bottom, transparent 50%, #555 50%); }
+.branch-vwire.vwire-top.energized { background:linear-gradient(to bottom, transparent 50%, #2ecc71 50%); }
+/* Bottom path: vertical wire only extends from top to middle */
+.branch-vwire.vwire-bottom { background:linear-gradient(to bottom, #555 50%, transparent 50%); }
+.branch-vwire.vwire-bottom.energized { background:linear-gradient(to bottom, #2ecc71 50%, transparent 50%); }
+
+/* Horizontal path inside a branch row */
+.branch-hpath { display:flex; align-items:center; gap:2px; padding:4px 4px; min-height:44px; }
 
 /* Branch add button */
 .branch-add-btn { padding:2px 6px; border:1px dashed #555; background:transparent; color:#888; border-radius:3px; cursor:pointer; font-size:.6rem; flex-shrink:0; margin-left:2px; }
