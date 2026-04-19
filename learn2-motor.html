@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ladder Lab — Level 2: Start/Stop Motor</title>
+    <link rel="stylesheet" href="editor.css">
+    <link rel="stylesheet" href="workbench.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; Ladder Lab</h1>
+        <div class="header-controls">
+            <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+            <button onclick="singleScan()">&#9193; Scan</button>
+            <span class="scan-label">Scan #<strong id="scan-num">0</strong></span>
+            <span class="scan-label"><strong id="scan-ms">200</strong>ms</span>
+            <input type="range" id="speed-slider" min="50" max="1000" value="200" step="50" oninput="setScanSpeed(this.value)">
+        </div>
+        <div class="level-badge">Level 2</div>
+        <div class="nav-links">
+            <a href="learn1-button.html" class="nav-link">&#8592; Level 1</a>
+            <a href="learn3-traffic.html" class="nav-link">Level 3 &#8594;</a>
+            <a href="index.html" class="nav-link">Hub</a>
+        </div>
+    </header>
+    <div class="learn-banner">
+        <div class="learn-goal"><strong>&#127919; Goal:</strong> Press START to run the motor. Press STOP to stop it. The motor should keep running after you release START (seal-in circuit).</div>
+        <div class="learn-hints"><strong>&#128161; Hints:</strong>
+            <span class="hint-chip">Use START and MOTOR in parallel (OR) for seal-in</span>
+            <span class="hint-chip">Use STOP as NC contact (XIO) to break the circuit</span>
+            <span class="hint-chip">Right-click a contact to add a branch (parallel path)</span>
+        </div>
+    </div>
+    <div class="workspace learn-workspace">
+        <aside id="workbench-panel" class="workbench">
+            <h3>&#128295; Workbench</h3>
+            <div class="wb-scene">
+                <div class="wb-buttons-row">
+                    <div class="wb-device">
+                        <div class="wb-pushbutton wb-green-btn" id="wb-start" onmousedown="EditorPLC.setTag('START',true);EditorPLC.notify()" onmouseup="EditorPLC.setTag('START',false);EditorPLC.notify()">
+                            <div class="wb-pb-cap" style="background:#27ae60"></div>
+                        </div>
+                        <div class="wb-label" style="color:#2ecc71">START</div>
+                    </div>
+                    <div class="wb-device">
+                        <div class="wb-pushbutton" id="wb-stop" onmousedown="EditorPLC.setTag('STOP',true);EditorPLC.notify()" onmouseup="EditorPLC.setTag('STOP',false);EditorPLC.notify()">
+                            <div class="wb-pb-cap"></div>
+                        </div>
+                        <div class="wb-label" style="color:#e74c3c">STOP</div>
+                    </div>
+                </div>
+                <div class="wb-wire" id="wb-wire-m"></div>
+                <div class="wb-plc"><div class="wb-plc-box"><div class="wb-plc-label">PLC</div><div class="wb-plc-led" id="wb-plc-run"></div><div class="wb-plc-text">RUN</div></div></div>
+                <div class="wb-wire" id="wb-wire-out"></div>
+                <div class="wb-device">
+                    <div class="wb-motor" id="wb-motor"><div class="wb-motor-blade" id="wb-blade">&#9881;</div></div>
+                    <div class="wb-label">MOTOR</div>
+                    <div class="wb-tag">MOTOR_OUT</div>
+                </div>
+            </div>
+            <div class="wb-status">
+                <div class="wb-status-row"><span class="wb-status-tag">START</span><span class="wb-status-val off" id="wb-s-val">OFF</span></div>
+                <div class="wb-status-row"><span class="wb-status-tag">STOP</span><span class="wb-status-val off" id="wb-st-val">OFF</span></div>
+                <div class="wb-status-row"><span class="wb-status-tag">MOTOR_OUT</span><span class="wb-status-val off" id="wb-m-val">OFF</span></div>
+            </div>
+            <div class="wb-success hidden" id="wb-success">&#127881; Motor runs after releasing START! Seal-in works!</div>
+        </aside>
+        <aside id="tag-panel"><h3>Tags <button class="small-btn" onclick="addTagPrompt()">+ Add</button></h3><div id="tag-list"></div></aside>
+        <section id="ladder-editor">
+            <div class="toolbar">
+                <span class="tb-label">Instructions:</span>
+                <button class="inst-btn" onclick="addInst('XIC')">&#9472;] [&#9472; XIC</button>
+                <button class="inst-btn" onclick="addInst('XIO')">&#9472;]/[&#9472; XIO</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTE')">&#9472;( )&#9472; OTE</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTL')">&#9472;(L)&#9472; OTL</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTU')">&#9472;(U)&#9472; OTU</button>
+                <span class="tb-sep">|</span>
+                <button class="inst-btn rung-btn" onclick="addRung()">+ Rung</button>
+            </div>
+            <div id="rungs-container"></div>
+        </section>
+    </div>
+    <script src="editor-engine.js"></script>
+    <script src="editor-ui.js"></script>
+    <script>
+    // Level 2 init
+    EditorPLC.tags={};EditorPLC.rungs=[];EditorPLC.scanCount=0;EditorPLC.timerAccs={};
+    EditorPLC.defineTag('START','BOOL',false);
+    EditorPLC.defineTag('STOP','BOOL',false);
+    EditorPLC.defineTag('MOTOR_OUT','BOOL',false);
+    EditorPLC.rungs.push({conditions:[],outputs:[],energized:false});
+    let l2success=false;let motorWasOn=false;
+    EditorPLC.onChange((plc)=>{
+        const s=plc.getTag('START'),st=plc.getTag('STOP'),m=plc.getTag('MOTOR_OUT');
+        document.getElementById('wb-start').className='wb-pushbutton wb-green-btn'+(s?' pressed':'');
+        document.getElementById('wb-stop').className='wb-pushbutton'+(st?' pressed':'');
+        const motor=document.getElementById('wb-motor');motor.className='wb-motor'+(m?' on':'');
+        document.getElementById('wb-plc-run').className='wb-plc-led'+(plc.running?' on':'');
+        document.getElementById('wb-wire-m').className='wb-wire'+(m?' live':'');
+        document.getElementById('wb-wire-out').className='wb-wire'+(m?' live':'');
+        ['s','st','m'].forEach((k,i)=>{const v=[s,st,m][i];const el=document.getElementById('wb-'+k+'-val');el.textContent=v?'ON':'OFF';el.className='wb-status-val '+(v?'on':'off');});
+        // Success: motor stays on after START released
+        if(m&&!s)motorWasOn=true;
+        if(motorWasOn&&!l2success){l2success=true;document.getElementById('wb-success').classList.remove('hidden');}
+        renderTagPanel();renderRungs();renderIOPanel();document.getElementById('scan-num').textContent=plc.scanCount;
+    });
+    renderAll();
+    </script>
+    <style>
+    .wb-buttons-row{display:flex;gap:20px}
+    .wb-green-btn .wb-pb-cap{background:#27ae60!important}
+    .wb-green-btn:active .wb-pb-cap,.wb-green-btn.pressed .wb-pb-cap{background:#2ecc71!important;box-shadow:0 1px 3px rgba(0,0,0,.4),0 0 20px rgba(46,204,113,.5)!important}
+    .wb-motor{width:80px;height:80px;border-radius:50%;border:4px solid #444;background:#222;display:flex;align-items:center;justify-content:center;transition:border-color .3s}
+    .wb-motor.on{border-color:#2ecc71;box-shadow:0 0 20px rgba(46,204,113,.3)}
+    .wb-motor-blade{font-size:2.5rem;color:#555;transition:color .3s}
+    .wb-motor.on .wb-motor-blade{color:#2ecc71;animation:motor-spin 1s linear infinite}
+    @keyframes motor-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    </style>
+</body>
+</html>

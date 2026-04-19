@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ladder Lab — Level 3: Traffic Light</title>
+    <link rel="stylesheet" href="editor.css">
+    <link rel="stylesheet" href="workbench.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; Ladder Lab</h1>
+        <div class="header-controls">
+            <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+            <button onclick="singleScan()">&#9193; Scan</button>
+            <span class="scan-label">Scan #<strong id="scan-num">0</strong></span>
+            <span class="scan-label"><strong id="scan-ms">200</strong>ms</span>
+            <input type="range" id="speed-slider" min="50" max="1000" value="200" step="50" oninput="setScanSpeed(this.value)">
+        </div>
+        <div class="level-badge">Level 3</div>
+        <div class="nav-links">
+            <a href="learn2-motor.html" class="nav-link">&#8592; Level 2</a>
+            <a href="index.html" class="nav-link">Hub</a>
+        </div>
+    </header>
+    <div class="learn-banner">
+        <div class="learn-goal"><strong>&#127919; Goal:</strong> Make the traffic light cycle: GREEN (5 scans) &#8594; YELLOW (3 scans) &#8594; RED (5 scans) &#8594; repeat forever.</div>
+        <div class="learn-hints"><strong>&#128161; Hints:</strong>
+            <span class="hint-chip">Use TON timers — when timer.DN goes true, switch to next light</span>
+            <span class="hint-chip">GREEN starts ON. When GREEN_TMR.DN fires, turn off GREEN, turn on YELLOW</span>
+            <span class="hint-chip">Use XIC on timer.DN bits to trigger transitions</span>
+            <span class="hint-chip">RED_TMR.DN should restart GREEN</span>
+        </div>
+    </div>
+    <div class="workspace learn-workspace">
+        <aside id="workbench-panel" class="workbench">
+            <h3>&#128295; Workbench</h3>
+            <div class="wb-scene" style="padding:30px 16px">
+                <!-- Traffic Light -->
+                <div class="wb-traffic-housing">
+                    <div class="wb-traffic-bg"></div>
+                    <div class="wb-traffic-light" id="wb-red"></div>
+                    <div class="wb-traffic-light" id="wb-yellow"></div>
+                    <div class="wb-traffic-light" id="wb-green"></div>
+                    <div class="wb-traffic-pole"></div>
+                </div>
+                <!-- Timer displays -->
+                <div class="wb-timer-panel">
+                    <div class="wb-timer-row">
+                        <span class="wb-timer-label" style="color:#2ecc71">GREEN_TMR</span>
+                        <div class="wb-timer-bar"><div class="wb-timer-fill" id="wb-g-bar" style="background:#2ecc71"></div></div>
+                        <span class="wb-timer-val" id="wb-g-val">0/5</span>
+                    </div>
+                    <div class="wb-timer-row">
+                        <span class="wb-timer-label" style="color:#f1c40f">YELLOW_TMR</span>
+                        <div class="wb-timer-bar"><div class="wb-timer-fill" id="wb-y-bar" style="background:#f1c40f"></div></div>
+                        <span class="wb-timer-val" id="wb-y-val">0/3</span>
+                    </div>
+                    <div class="wb-timer-row">
+                        <span class="wb-timer-label" style="color:#e74c3c">RED_TMR</span>
+                        <div class="wb-timer-bar"><div class="wb-timer-fill" id="wb-r-bar" style="background:#e74c3c"></div></div>
+                        <span class="wb-timer-val" id="wb-r-val">0/5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="wb-status">
+                <div class="wb-status-row"><span class="wb-status-tag">GREEN</span><span class="wb-status-val off" id="wb-gv">OFF</span></div>
+                <div class="wb-status-row"><span class="wb-status-tag">YELLOW</span><span class="wb-status-val off" id="wb-yv">OFF</span></div>
+                <div class="wb-status-row"><span class="wb-status-tag">RED</span><span class="wb-status-val off" id="wb-rv">OFF</span></div>
+            </div>
+            <div class="wb-success hidden" id="wb-success">&#127881; Traffic light is cycling! You mastered timers!</div>
+        </aside>
+        <aside id="tag-panel"><h3>Tags <button class="small-btn" onclick="addTagPrompt()">+ Add</button></h3><div id="tag-list"></div></aside>
+        <section id="ladder-editor">
+            <div class="toolbar">
+                <span class="tb-label">Instructions:</span>
+                <button class="inst-btn" onclick="addInst('XIC')">&#9472;] [&#9472; XIC</button>
+                <button class="inst-btn" onclick="addInst('XIO')">&#9472;]/[&#9472; XIO</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTE')">&#9472;( )&#9472; OTE</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTL')">&#9472;(L)&#9472; OTL</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTU')">&#9472;(U)&#9472; OTU</button>
+                <button class="inst-btn math-btn" onclick="addInst('TON')">TON</button>
+                <span class="tb-sep">|</span>
+                <button class="inst-btn rung-btn" onclick="addRung()">+ Rung</button>
+            </div>
+            <div id="rungs-container"></div>
+        </section>
+    </div>
+    <script src="editor-engine.js"></script>
+    <script src="editor-ui.js"></script>
+    <script>
+    // Level 3 init
+    EditorPLC.tags={};EditorPLC.rungs=[];EditorPLC.scanCount=0;EditorPLC.timerAccs={};
+    EditorPLC.defineTag('GREEN','BOOL',true);
+    EditorPLC.defineTag('YELLOW','BOOL',false);
+    EditorPLC.defineTag('RED','BOOL',false);
+    // Pre-create timer tags so they show in picker
+    ['GREEN_TMR','YELLOW_TMR','RED_TMR'].forEach(t=>{
+        EditorPLC.defineTag(t+'_EN','BOOL',false);
+        EditorPLC.defineTag(t+'_TT','BOOL',false);
+        EditorPLC.defineTag(t+'_DN','BOOL',false);
+        EditorPLC.defineTag(t+'_ACC','INT',0);
+    });
+    // Start with a few empty rungs
+    for(let i=0;i<3;i++) EditorPLC.rungs.push({conditions:[],outputs:[],energized:false});
+
+    let cycleCount=0;let l3success=false;let prevGreen=true;
+    EditorPLC.onChange((plc)=>{
+        const g=plc.getTag('GREEN'),y=plc.getTag('YELLOW'),r=plc.getTag('RED');
+        // Traffic light visuals
+        document.getElementById('wb-green').className='wb-traffic-light'+(g?' green-on':'');
+        document.getElementById('wb-yellow').className='wb-traffic-light'+(y?' yellow-on':'');
+        document.getElementById('wb-red').className='wb-traffic-light'+(r?' red-on':'');
+        // Timer bars
+        const gAcc=plc.getTag('GREEN_TMR_ACC')||0,yAcc=plc.getTag('YELLOW_TMR_ACC')||0,rAcc=plc.getTag('RED_TMR_ACC')||0;
+        document.getElementById('wb-g-bar').style.width=(gAcc/5*100)+'%';document.getElementById('wb-g-val').textContent=gAcc+'/5';
+        document.getElementById('wb-y-bar').style.width=(yAcc/3*100)+'%';document.getElementById('wb-y-val').textContent=yAcc+'/3';
+        document.getElementById('wb-r-bar').style.width=(rAcc/5*100)+'%';document.getElementById('wb-r-val').textContent=rAcc+'/5';
+        // Status
+        [['gv',g],['yv',y],['rv',r]].forEach(([id,v])=>{const el=document.getElementById('wb-'+id);el.textContent=v?'ON':'OFF';el.className='wb-status-val '+(v?'on':'off');});
+        document.getElementById('wb-plc-run').className='wb-plc-led'+(plc.running?' on':'');
+        // Detect cycling: GREEN turns on after being off (completed a full cycle)
+        if(g&&!prevGreen)cycleCount++;
+        prevGreen=g;
+        if(cycleCount>=2&&!l3success){l3success=true;document.getElementById('wb-success').classList.remove('hidden');}
+        renderTagPanel();renderRungs();renderIOPanel();document.getElementById('scan-num').textContent=plc.scanCount;
+    });
+    renderAll();
+    </script>
+    <style>
+    .wb-timer-panel{width:100%;display:flex;flex-direction:column;gap:6px;margin-top:16px}
+    .wb-timer-row{display:flex;align-items:center;gap:6px}
+    .wb-timer-label{font-size:.6rem;font-weight:bold;width:75px;text-align:right;letter-spacing:.5px;font-family:'Courier New',monospace}
+    .wb-timer-bar{flex:1;height:10px;background:#1a1a2e;border:1px solid #333;border-radius:3px;overflow:hidden}
+    .wb-timer-fill{height:100%;border-radius:2px;transition:width .15s}
+    .wb-timer-val{font-size:.6rem;color:#888;width:30px;font-family:'Courier New',monospace}
+    </style>
+</body>
+</html>
