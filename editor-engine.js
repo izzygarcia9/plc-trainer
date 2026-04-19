@@ -31,6 +31,9 @@ const EditorPLC = {
         const resolved = name ? name.replace(/\./g, '_') : name;
         if (this.tags[resolved]) {
             this.tags[resolved].value = value;
+        } else if (resolved) {
+            // Auto-create if doesn't exist
+            this.tags[resolved] = { name: resolved, type: typeof value === 'boolean' ? 'BOOL' : 'INT', value: value, prevValue: value };
         }
     },
 

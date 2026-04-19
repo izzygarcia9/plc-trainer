@@ -5,7 +5,8 @@
 
 // Override the default challenge init to load Level 1 tags
 (function() {
-    // Clear default init
+    // Clear default init — remove the editor-ui listener first
+    EditorPLC.listeners = [];
     EditorPLC.tags = {};
     EditorPLC.rungs = [];
     EditorPLC.scanCount = 0;
@@ -21,7 +22,7 @@
     // Track if user has successfully lit the bulb
     let successShown = false;
 
-    // Workbench update — runs every scan
+    // Single combined listener for both workbench + editor UI
     EditorPLC.onChange((plc) => {
         const pbInput = plc.getTag('PB_INPUT');
         const lightOut = plc.getTag('LIGHT_OUT');
@@ -51,14 +52,14 @@
         const lightVal = document.getElementById('wb-light-val');
         if (lightVal) { lightVal.textContent = lightOut ? 'ON' : 'OFF'; lightVal.className = 'wb-status-val ' + (lightOut ? 'on' : 'off'); }
 
-        // Success detection — if light turns on while button is pressed, they did it!
+        // Success detection
         if (lightOut && pbInput && !successShown) {
             successShown = true;
             const successEl = document.getElementById('wb-success');
             if (successEl) successEl.classList.remove('hidden');
         }
 
-        // Update the standard editor panels
+        // Update editor panels
         renderTagPanel();
         renderRungs();
         renderIOPanel();
@@ -66,7 +67,9 @@
     });
 
     // Initial render
-    renderAll();
+    renderTagPanel();
+    renderRungs();
+    renderIOPanel();
 })();
 
 // Workbench button handlers
