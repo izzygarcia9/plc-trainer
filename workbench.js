@@ -60,10 +60,7 @@
         }
 
         // Update editor panels
-        renderTagPanel();
-        renderRungs();
-        renderIOPanel();
-        document.getElementById('scan-num').textContent = plc.scanCount;
+        lightUpdate();
     });
 
     // Initial render

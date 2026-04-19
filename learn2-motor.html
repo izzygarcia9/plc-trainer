@@ -108,7 +108,7 @@
         // Success: motor stays on after START released
         if(m&&!s)motorWasOn=true;
         if(motorWasOn&&!l2success){l2success=true;document.getElementById('wb-success').classList.remove('hidden');}
-        renderTagPanel();renderRungs();renderIOPanel();document.getElementById('scan-num').textContent=plc.scanCount;
+        lightUpdate();
     });
     renderAll();
     </script>

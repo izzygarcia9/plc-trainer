@@ -125,7 +125,7 @@
         if(g&&!prevGreen)cycleCount++;
         prevGreen=g;
         if(cycleCount>=2&&!l3success){l3success=true;document.getElementById('wb-success').classList.remove('hidden');}
-        renderTagPanel();renderRungs();renderIOPanel();document.getElementById('scan-num').textContent=plc.scanCount;
+        lightUpdate();
     });
     renderAll();
     </script>

@@ -134,17 +134,68 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 /* Rung conditions — horizontal flow of wires, instructions, and branch groups */
 .rung-conditions { display:flex; align-items:center; gap:2px; padding:4px; min-height:44px; flex:1; }
 
-/* Branch group — inline vertical stack of parallel paths */
-.branch-group { display:inline-flex; flex-direction:column; border:2px solid #f39c12; border-radius:4px; padding:2px 0; position:relative; flex-shrink:0; }
-.rung-row.energized .branch-group { border-color:#2ecc71; }
+/* Branch group — inline vertical stack of parallel paths with wire-style connectors */
+.branch-group { display:inline-flex; flex-direction:column; position:relative; flex-shrink:0; padding:0 2px; }
+
+/* Left and right vertical wires connecting the paths */
+.branch-group::before {
+    content:'';
+    position:absolute;
+    left:0;
+    top:50%;
+    bottom:0;
+    width:2px;
+    background:#555;
+    z-index:1;
+}
+.branch-group::after {
+    content:'';
+    position:absolute;
+    right:0;
+    top:50%;
+    bottom:0;
+    width:2px;
+    background:#555;
+    z-index:1;
+}
+/* For multi-path: extend vertical lines from first path center to last path center */
+.branch-group.has-branches::before,
+.branch-group.has-branches::after {
+    top:22px;
+    bottom:22px;
+}
+.rung-row.energized .branch-group::before,
+.rung-row.energized .branch-group::after { background:#2ecc71; }
 
 /* Each path inside the branch group */
-.branch-group-path { display:flex; align-items:center; gap:2px; padding:2px 6px; min-height:36px; }
-.branch-group-path:not(:last-child) { border-bottom:1px dashed rgba(243,156,18,.3); }
-.rung-row.energized .branch-group-path:not(:last-child) { border-bottom-color:rgba(46,204,113,.3); }
+.branch-group-path { display:flex; align-items:center; gap:2px; padding:2px 4px; min-height:44px; position:relative; }
+
+/* Horizontal tee connectors from vertical line into each path */
+.branch-group-path::before {
+    content:'';
+    position:absolute;
+    left:-2px;
+    top:50%;
+    width:6px;
+    height:2px;
+    background:#555;
+    z-index:2;
+}
+.branch-group-path::after {
+    content:'';
+    position:absolute;
+    right:-2px;
+    top:50%;
+    width:6px;
+    height:2px;
+    background:#555;
+    z-index:2;
+}
+.rung-row.energized .branch-group-path::before,
+.rung-row.energized .branch-group-path::after { background:#2ecc71; }
 
 /* Branch add button */
-.branch-add-btn { padding:2px 6px; border:1px dashed #f39c12; background:transparent; color:#f39c12; border-radius:3px; cursor:pointer; font-size:.6rem; flex-shrink:0; margin-left:2px; }
+.branch-add-btn { padding:2px 6px; border:1px dashed #555; background:transparent; color:#888; border-radius:3px; cursor:pointer; font-size:.6rem; flex-shrink:0; margin-left:2px; }
 .branch-add-btn:hover { border-color:#f1c40f; color:#f1c40f; background:rgba(243,156,18,.1); }
 
 /* OSR/OSF styling */

@@ -338,7 +338,7 @@ function renderRungs() {
             if (hasBranches) {
                 // Build a branch group: inline block with main-path conditions on top, branches below
                 const branchGroup = document.createElement('div');
-                branchGroup.className = 'branch-group';
+                branchGroup.className = 'branch-group has-branches';
 
                 // Top path (main conditions inside the parallel group)
                 const topPath = document.createElement('div');
@@ -706,11 +706,72 @@ function renderAll() {
     document.getElementById('scan-num').textContent = EditorPLC.scanCount;
 }
 
-EditorPLC.onChange(() => {
-    renderTagPanel();
-    renderRungs();
-    renderIOPanel();
+// Lightweight scan update — only updates energized states, tag values, and scan counter
+// Does NOT rebuild the DOM (which is expensive)
+function lightUpdate() {
+    // Update scan counter
     document.getElementById('scan-num').textContent = EditorPLC.scanCount;
+
+    // Update energized state on rung rows
+    const rows = document.querySelectorAll('.rung-row');
+    EditorPLC.rungs.forEach((rung, ri) => {
+        const row = rows[ri];
+        if (!row) return;
+        if (rung.energized) { row.classList.add('energized'); } else { row.classList.remove('energized'); }
+        // Update rails
+        row.querySelectorAll('.rung-rail').forEach(r => { if (rung.energized) r.classList.add('energized'); else r.classList.remove('energized'); });
+        // Update wires
+        row.querySelectorAll('.wire').forEach(w => { if (rung.energized) w.classList.add('energized'); else w.classList.remove('energized'); });
+        // Update branch group border
+        row.querySelectorAll('.branch-group').forEach(bg => { /* CSS handles via .rung-row.energized */ });
+        // Update instruction blocks
+        row.querySelectorAll('.inst-block').forEach(ib => { if (rung.energized) ib.classList.add('energized'); else ib.classList.remove('energized'); });
+    });
+
+    // Update tag panel values
+    for (const [name, tag] of Object.entries(EditorPLC.tags)) {
+        if (name.endsWith('_EN') || name.endsWith('_TT') || name.endsWith('_DN') || name.endsWith('_ACC') || name.endsWith('_prev') || name.startsWith('_CONST_')) continue;
+        // Find the tag-val span by looking through tag-items
+    }
+    // Simpler: just update the I/O panel and tag panel values in-place
+    const tagItems = document.querySelectorAll('#tag-list .tag-item');
+    tagItems.forEach(item => {
+        const nameEl = item.querySelector('.tag-name');
+        if (!nameEl) return;
+        const name = nameEl.textContent;
+        const tag = EditorPLC.tags[name];
+        if (!tag) return;
+        const toggleEl = item.querySelector('.tag-toggle');
+        const valEl = item.querySelector('.tag-val');
+        if (toggleEl) { if (tag.value) toggleEl.classList.add('on'); else toggleEl.classList.remove('on'); }
+        if (valEl) {
+            const isBool = tag.type === 'BOOL';
+            valEl.textContent = isBool ? (tag.value ? '1' : '0') : tag.value;
+            valEl.className = 'tag-val ' + (isBool ? (tag.value ? 'true' : 'false') : 'num');
+        }
+    });
+
+    // Update I/O panel values
+    const ioItems = document.querySelectorAll('#io-list .io-item');
+    ioItems.forEach(item => {
+        const nameEl = item.querySelector('.io-name');
+        if (!nameEl) return;
+        const name = nameEl.textContent;
+        const tag = EditorPLC.tags[name];
+        if (!tag) return;
+        const valEl = item.querySelector('.io-val');
+        const changed = tag.value !== tag.prevValue;
+        nameEl.style.color = changed ? '#00d4ff' : '';
+        if (valEl) {
+            const isBool = tag.type === 'BOOL';
+            valEl.textContent = isBool ? (tag.value ? 'TRUE' : 'FALSE') : tag.value;
+            valEl.className = 'io-val ' + (isBool ? (tag.value ? 'true' : 'false') : 'num');
+        }
+    });
+}
+
+EditorPLC.onChange(() => {
+    lightUpdate();
 });
 
 // ─── Init ───
