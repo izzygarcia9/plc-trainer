@@ -63,7 +63,7 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .rung-num { width:28px; display:flex; align-items:center; justify-content:center; font-size:.6rem; color:#555; border-right:1px solid #2a2d3a; flex-shrink:0; }
 .rung-rail { width:4px; background:#aaa; flex-shrink:0; }
 .rung-rail.energized { background:#2ecc71; }
-.rung-outputs { display:flex; align-items:flex-start; gap:2px; padding:4px; border-left:1px dashed #2a2d3a; min-width:100px; flex-wrap:wrap; margin-left:auto; padding-top:8px; }
+.rung-outputs { display:flex; align-items:center; gap:2px; padding:4px; border-left:1px dashed #2a2d3a; min-width:100px; flex-wrap:wrap; margin-left:auto; }
 .rung-actions { display:flex; flex-direction:column; justify-content:center; gap:2px; padding:2px 4px; border-left:1px solid #2a2d3a; }
 .rung-actions button { padding:1px 4px; border:1px solid #333; background:transparent; color:#555; border-radius:2px; cursor:pointer; font-size:.6rem; }
 .rung-actions button:hover { color:#e74c3c; border-color:#e74c3c; }
@@ -138,8 +138,8 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .branch-logic { display:flex; flex-direction:row; align-items:stretch; flex-shrink:0; }
 .branch-vertical { width:3px; background:#aaa; flex-shrink:0; }
 .rung-row.energized .branch-vertical { background:#2ecc71; }
-.branch-rungs { display:flex; flex-direction:column; flex:1; }
-.branch-rung { display:flex; align-items:center; gap:0; padding:2px 0; flex:1; }
+.branch-rungs { display:flex; flex-direction:column; }
+.branch-rung { display:flex; align-items:center; gap:0; padding:2px 0; }
 .short-wire { width:10px; height:3px; background:#aaa; flex-shrink:0; align-self:center; }
 .rung-row.energized .short-wire { background:#2ecc71; }
 
