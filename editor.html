@@ -46,25 +46,25 @@
         <section id="ladder-editor">
             <div class="toolbar">
                 <span class="tb-label">Add Instruction:</span>
-                <button class="inst-btn" onclick="addInst('XIC')" title="Examine If Closed (NO)">&#9472;] [&#9472; XIC</button>
-                <button class="inst-btn" onclick="addInst('XIO')" title="Examine If Open (NC)">&#9472;]/[&#9472; XIO</button>
-                <button class="inst-btn coil-btn" onclick="addInst('OTE')" title="Output Energize">&#9472;( )&#9472; OTE</button>
-                <button class="inst-btn coil-btn" onclick="addInst('OTL')" title="Output Latch">&#9472;(L)&#9472; OTL</button>
-                <button class="inst-btn coil-btn" onclick="addInst('OTU')" title="Output Unlatch">&#9472;(U)&#9472; OTU</button>
-                <button class="inst-btn math-btn" onclick="addInst('TON')" title="Timer On-Delay">TON</button>
-                <button class="inst-btn math-btn" onclick="addInst('CTU')" title="Count Up">CTU</button>
-                <button class="inst-btn math-btn" onclick="addInst('CTD')" title="Count Down">CTD</button>
-                <button class="inst-btn math-btn" onclick="addInst('MOV')" title="Move">MOV</button>
-                <button class="inst-btn math-btn" onclick="addInst('ADD')" title="Add">ADD</button>
-                <button class="inst-btn math-btn" onclick="addInst('SUB')" title="Subtract">SUB</button>
-                <button class="inst-btn math-btn" onclick="addInst('MUL')" title="Multiply">MUL</button>
-                <button class="inst-btn math-btn" onclick="addInst('DIV')" title="Divide">DIV</button>
-                <button class="inst-btn cmp-btn" onclick="addInst('GRT')" title="Greater Than">GRT</button>
-                <button class="inst-btn cmp-btn" onclick="addInst('LES')" title="Less Than">LES</button>
-                <button class="inst-btn cmp-btn" onclick="addInst('EQU')" title="Equal">EQU</button>
-                <button class="inst-btn cmp-btn" onclick="addInst('GEQ')" title="Greater or Equal">GEQ</button>
-                <button class="inst-btn cmp-btn" onclick="addInst('LEQ')" title="Less or Equal">LEQ</button>
-                <button class="inst-btn cmp-btn" onclick="addInst('NEQ')" title="Not Equal">NEQ</button>
+                <button class="inst-btn" draggable="true" data-inst="XIC" onclick="addInst('XIC')" title="Examine If Closed (NO)">&#9472;] [&#9472; XIC</button>
+                <button class="inst-btn" draggable="true" data-inst="XIO" onclick="addInst('XIO')" title="Examine If Open (NC)">&#9472;]/[&#9472; XIO</button>
+                <button class="inst-btn coil-btn" draggable="true" data-inst="OTE" onclick="addInst('OTE')" title="Output Energize">&#9472;( )&#9472; OTE</button>
+                <button class="inst-btn coil-btn" draggable="true" data-inst="OTL" onclick="addInst('OTL')" title="Output Latch">&#9472;(L)&#9472; OTL</button>
+                <button class="inst-btn coil-btn" draggable="true" data-inst="OTU" onclick="addInst('OTU')" title="Output Unlatch">&#9472;(U)&#9472; OTU</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="TON" onclick="addInst('TON')" title="Timer On-Delay">TON</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="CTU" onclick="addInst('CTU')" title="Count Up">CTU</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="CTD" onclick="addInst('CTD')" title="Count Down">CTD</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="MOV" onclick="addInst('MOV')" title="Move">MOV</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="ADD" onclick="addInst('ADD')" title="Add">ADD</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="SUB" onclick="addInst('SUB')" title="Subtract">SUB</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="MUL" onclick="addInst('MUL')" title="Multiply">MUL</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="DIV" onclick="addInst('DIV')" title="Divide">DIV</button>
+                <button class="inst-btn cmp-btn" draggable="true" data-inst="GRT" onclick="addInst('GRT')" title="Greater Than">GRT</button>
+                <button class="inst-btn cmp-btn" draggable="true" data-inst="LES" onclick="addInst('LES')" title="Less Than">LES</button>
+                <button class="inst-btn cmp-btn" draggable="true" data-inst="EQU" onclick="addInst('EQU')" title="Equal">EQU</button>
+                <button class="inst-btn cmp-btn" draggable="true" data-inst="GEQ" onclick="addInst('GEQ')" title="Greater or Equal">GEQ</button>
+                <button class="inst-btn cmp-btn" draggable="true" data-inst="LEQ" onclick="addInst('LEQ')" title="Less or Equal">LEQ</button>
+                <button class="inst-btn cmp-btn" draggable="true" data-inst="NEQ" onclick="addInst('NEQ')" title="Not Equal">NEQ</button>
                 <span class="tb-sep">|</span>
                 <button class="inst-btn rung-btn" onclick="addRung()">+ Rung</button>
             </div>

@@ -163,6 +163,9 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 /* Drag and drop */
 .tag-item[draggable="true"] { cursor:grab; }
 .tag-item[draggable="true"]:active { cursor:grabbing; }
+.inst-btn[draggable="true"] { cursor:grab; }
+.inst-btn[draggable="true"]:active { cursor:grabbing; }
+.rung-row.drag-over { outline:2px dashed #00d4ff !important; background:rgba(0,212,255,.03) !important; }
 .rung-conditions.drag-over, .rung-outputs.drag-over { background:rgba(0,212,255,.05); }
 
 /* Timer/Counter detail display */

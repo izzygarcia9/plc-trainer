@@ -175,28 +175,71 @@ function dropTagOnRung(e, rungIdx, side) {
 
 // Global drag-over handler to allow drops
 document.addEventListener('dragover', (e) => {
-    if (e.target.closest && (e.target.closest('.rung-conditions') || e.target.closest('.rung-outputs'))) {
+    if (e.target.closest && (e.target.closest('.rung-conditions') || e.target.closest('.rung-outputs') || e.target.closest('.rung-row'))) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
+        const row = e.target.closest('.rung-row');
+        if (row) row.classList.add('drag-over');
+    }
+});
+
+document.addEventListener('dragleave', (e) => {
+    const row = e.target.closest ? e.target.closest('.rung-row') : null;
+    if (row) row.classList.remove('drag-over');
+});
+
+// Drag start for toolbar instruction buttons
+document.addEventListener('dragstart', (e) => {
+    const btn = e.target.closest ? e.target.closest('[data-inst]') : null;
+    if (btn) {
+        e.dataTransfer.setData('application/inst-type', btn.dataset.inst);
+        e.dataTransfer.effectAllowed = 'copy';
     }
 });
 
 document.addEventListener('drop', (e) => {
     const condTarget = e.target.closest ? e.target.closest('.rung-conditions') : null;
     const outTarget = e.target.closest ? e.target.closest('.rung-outputs') : null;
-    if (!condTarget && !outTarget) return;
+    const rungTarget = e.target.closest ? e.target.closest('.rung-row') : null;
+    if (!condTarget && !outTarget && !rungTarget) return;
     e.preventDefault();
-    const tagName = e.dataTransfer.getData('text/plain');
-    if (!tagName || !EditorPLC.tags[tagName]) return;
+    // Remove drag-over highlight
+    document.querySelectorAll('.rung-row.drag-over').forEach(r => r.classList.remove('drag-over'));
 
     // Find which rung this belongs to
-    const rungRow = (condTarget || outTarget).closest('.rung-row');
+    const rungRow = (condTarget || outTarget || rungTarget).closest('.rung-row');
     if (!rungRow) return;
     const rungIdx = Array.from(document.querySelectorAll('.rung-row')).indexOf(rungRow);
     if (rungIdx < 0) return;
 
-    const side = condTarget ? 'cond' : 'out';
     const rung = EditorPLC.rungs[rungIdx];
+    const side = outTarget ? 'out' : 'cond';
+
+    // Check if this is an instruction drag from toolbar
+    const instType = e.dataTransfer.getData('application/inst-type');
+    if (instType) {
+        const isOutput = ['OTE', 'OTL', 'OTU', 'TON', 'CTU', 'CTD', 'MOV', 'ADD', 'SUB', 'MUL', 'DIV'].includes(instType);
+        const inst = { type: instType, tag: '', id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
+        if (['GRT', 'LES', 'EQU', 'GEQ', 'LEQ', 'NEQ'].includes(instType)) inst.tag2 = '';
+        if (['ADD', 'SUB', 'MUL', 'DIV'].includes(instType)) { inst.tag2 = ''; inst.tag3 = ''; }
+        if (instType === 'MOV') inst.tag2 = '';
+        if (instType === 'TON') inst.preset = 5;
+        if (instType === 'CTU' || instType === 'CTD') inst.preset = 10;
+
+        if (isOutput || outTarget) {
+            rung.outputs.push(inst);
+        } else {
+            rung.conditions.push(inst);
+        }
+        renderRungs();
+        pickTag(inst.id, 'tag');
+        return;
+    }
+
+    // Otherwise check for tag drag from tag panel
+    const tagName = e.dataTransfer.getData('text/plain');
+    if (!tagName || !EditorPLC.tags[tagName]) return;
+
     const inst = { type: side === 'cond' ? 'XIC' : 'OTE', tag: tagName, id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
 
     if (side === 'cond') rung.conditions.push(inst);
