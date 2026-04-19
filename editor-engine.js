@@ -84,6 +84,13 @@ const EditorPLC = {
             }
         }
 
+        // Evaluate post-branch conditions (series AND after branch group)
+        if (rung.postConditions && rung.postConditions.length > 0) {
+            for (const inst of rung.postConditions) {
+                power = power && this.evalCondition(inst);
+            }
+        }
+
         rung.energized = power;
 
         // If power flows, execute outputs

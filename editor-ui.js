@@ -60,6 +60,7 @@ function deleteTag(name) {
     for (const rung of EditorPLC.rungs) {
         rung.conditions = rung.conditions.filter(i => i.tag !== name);
         rung.outputs = rung.outputs.filter(i => i.tag !== name);
+        if (rung.postConditions) rung.postConditions = rung.postConditions.filter(i => i.tag !== name);
     }
     renderAll();
 }
@@ -135,7 +136,13 @@ function addInst(type) {
     if (isOutput) {
         rung.outputs.push(inst);
     } else {
-        rung.conditions.push(inst);
+        // If rung has branches, add new conditions to postConditions (series after branch group)
+        if (rung.branches && rung.branches.length > 0) {
+            if (!rung.postConditions) rung.postConditions = [];
+            rung.postConditions.push(inst);
+        } else {
+            rung.conditions.push(inst);
+        }
     }
 
     renderRungs();
@@ -278,7 +285,7 @@ function applyTagPickManual() {
 
 function setInstField(instId, field, value) {
     for (const rung of EditorPLC.rungs) {
-        for (const inst of [...rung.conditions, ...rung.outputs]) {
+        for (const inst of [...rung.conditions, ...rung.outputs, ...(rung.postConditions || [])]) {
             if (inst.id === instId) {
                 inst[field] = value;
                 return;
@@ -312,78 +319,96 @@ function renderRungs() {
         // Rung number
         row.innerHTML = `<div class="rung-num">R${ri}</div><div class="rung-rail${rung.energized ? ' energized' : ''}"></div>`;
 
-        // Rung body — contains main path + branch paths stacked vertically
-        const rungBody = document.createElement('div');
-        rungBody.className = 'rung-body';
+        // Conditions area — flows horizontally: [wire][inst][wire]...[branch-group]...[wire][inst][wire][spacer]
+        const condDiv = document.createElement('div');
+        condDiv.className = 'rung-conditions';
+        condDiv.ondragover = (e) => { e.preventDefault(); condDiv.style.background = 'rgba(0,212,255,.05)'; };
+        condDiv.ondragleave = () => { condDiv.style.background = ''; };
+        condDiv.ondrop = (e) => { e.preventDefault(); condDiv.style.background = ''; dropTagOnRung(e, ri, 'cond'); };
 
-        // Main condition path
-        const mainPath = document.createElement('div');
-        mainPath.className = 'rung-path main-path';
-        mainPath.ondragover = (e) => { e.preventDefault(); mainPath.style.background = 'rgba(0,212,255,.05)'; };
-        mainPath.ondragleave = () => { mainPath.style.background = ''; };
-        mainPath.ondrop = (e) => { e.preventDefault(); mainPath.style.background = ''; dropTagOnRung(e, ri, 'cond'); };
+        const hasBranches = rung.branches && rung.branches.length > 0;
+        const hasConds = rung.conditions.length > 0;
 
-        if (rung.conditions.length === 0 && (!rung.branches || rung.branches.length === 0)) {
-            mainPath.innerHTML = '<div class="drop-hint">Drag a tag here or click instruction above</div>';
-        }
-        // Leading wire
-        mainPath.appendChild(makeWire(rung.energized));
-        rung.conditions.forEach((inst, ii) => {
-            mainPath.appendChild(makeInstBlock(inst, ri, 'cond', ii, rung.energized));
-            mainPath.appendChild(makeWire(rung.energized));
-        });
-        // Stretching wire at end of main path
-        const mainStretch = makeWire(rung.energized);
-        mainStretch.classList.add('spacer');
-        mainPath.appendChild(mainStretch);
+        if (!hasConds && !hasBranches) {
+            condDiv.innerHTML = '<div class="drop-hint">Drag a tag here or click instruction above</div>';
+        } else {
+            // Leading wire
+            condDiv.appendChild(makeWire(rung.energized));
 
-        rungBody.appendChild(mainPath);
+            if (hasBranches) {
+                // Build a branch group: inline block with main-path conditions on top, branches below
+                const branchGroup = document.createElement('div');
+                branchGroup.className = 'branch-group';
 
-        // Branch paths (parallel OR paths below main) — wrapped in a div with vertical connectors
-        if (rung.branches && rung.branches.length > 0) {
-            rung.branches.forEach((branch, bi) => {
-                const branchWrap = document.createElement('div');
-                branchWrap.className = 'branch-wrapper';
+                // Top path (main conditions inside the parallel group)
+                const topPath = document.createElement('div');
+                topPath.className = 'branch-group-path';
+                rung.conditions.forEach((inst, ii) => {
+                    topPath.appendChild(makeInstBlock(inst, ri, 'cond', ii, rung.energized));
+                    topPath.appendChild(makeWire(rung.energized));
+                });
+                if (rung.conditions.length === 0) {
+                    const w = makeWire(rung.energized);
+                    w.style.minWidth = '40px';
+                    w.classList.add('spacer');
+                    topPath.appendChild(w);
+                }
+                branchGroup.appendChild(topPath);
 
-                const branchPath = document.createElement('div');
-                branchPath.className = 'rung-path branch-path';
+                // Each branch path below
+                rung.branches.forEach((branch, bi) => {
+                    const branchPath = document.createElement('div');
+                    branchPath.className = 'branch-group-path';
+                    branch.conditions.forEach((inst, ii) => {
+                        branchPath.appendChild(makeInstBlock(inst, ri, 'branch_' + bi, ii, rung.energized));
+                        branchPath.appendChild(makeWire(rung.energized));
+                    });
+                    if (branch.conditions.length === 0) {
+                        const hint = document.createElement('div');
+                        hint.className = 'drop-hint';
+                        hint.style.fontSize = '.55rem';
+                        hint.style.padding = '4px 6px';
+                        hint.textContent = '+ add';
+                        hint.style.cursor = 'pointer';
+                        hint.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, bi); };
+                        branchPath.appendChild(hint);
+                    }
+                    // Add instruction button for branch
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'branch-add-btn';
+                    addBtn.textContent = '+';
+                    addBtn.title = 'Add instruction to this branch';
+                    addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, bi); };
+                    branchPath.appendChild(addBtn);
 
-                // Leading wire
-                branchPath.appendChild(makeWire(rung.energized));
-
-                branch.conditions.forEach((inst, ii) => {
-                    branchPath.appendChild(makeInstBlock(inst, ri, 'branch_' + bi, ii, rung.energized));
-                    branchPath.appendChild(makeWire(rung.energized));
+                    branchGroup.appendChild(branchPath);
                 });
 
-                if (branch.conditions.length === 0) {
-                    const hint = document.createElement('div');
-                    hint.className = 'drop-hint';
-                    hint.style.fontSize = '.55rem';
-                    hint.style.padding = '4px 8px';
-                    hint.textContent = 'click + to add';
-                    branchPath.appendChild(hint);
+                condDiv.appendChild(branchGroup);
+                condDiv.appendChild(makeWire(rung.energized));
+
+                // Post-branch conditions (in series after the branch group)
+                if (rung.postConditions && rung.postConditions.length > 0) {
+                    rung.postConditions.forEach((inst, ii) => {
+                        condDiv.appendChild(makeInstBlock(inst, ri, 'post', ii, rung.energized));
+                        condDiv.appendChild(makeWire(rung.energized));
+                    });
                 }
+            } else {
+                // No branches — just render conditions inline
+                rung.conditions.forEach((inst, ii) => {
+                    condDiv.appendChild(makeInstBlock(inst, ri, 'cond', ii, rung.energized));
+                    condDiv.appendChild(makeWire(rung.energized));
+                });
+            }
 
-                // Add instruction button
-                const addBtn = document.createElement('button');
-                addBtn.className = 'branch-add-btn';
-                addBtn.textContent = '+';
-                addBtn.title = 'Add instruction to this branch';
-                addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, bi); };
-                branchPath.appendChild(addBtn);
-
-                // Stretching wire
-                const branchStretch = makeWire(rung.energized);
-                branchStretch.classList.add('spacer');
-                branchPath.appendChild(branchStretch);
-
-                branchWrap.appendChild(branchPath);
-                rungBody.appendChild(branchWrap);
-            });
+            // Stretching spacer wire
+            const spacer = makeWire(rung.energized);
+            spacer.classList.add('spacer');
+            condDiv.appendChild(spacer);
         }
 
-        row.appendChild(rungBody);
+        row.appendChild(condDiv);
 
         // Outputs
         const outDiv = document.createElement('div');
@@ -543,7 +568,7 @@ function showInstMenu(e, inst, rungIdx, side, instIdx) {
     items += `<div class="ctx-item ctx-danger" onclick="removeInst(${rungIdx},'${side}',${instIdx});closeInstMenu()">Delete</div>`;
 
     // Branch option (only for conditions)
-    if (side === 'cond') {
+    if (side === 'cond' || side === 'post') {
         items += `<div class="ctx-sep"></div>`;
         items += `<div class="ctx-item" onclick="addBranch(${rungIdx})">Add Branch (parallel)</div>`;
     }
@@ -560,7 +585,7 @@ function closeInstMenu() {
 
 function changeInstType(instId, newType) {
     for (const rung of EditorPLC.rungs) {
-        for (const inst of [...rung.conditions, ...rung.outputs]) {
+        for (const inst of [...rung.conditions, ...rung.outputs, ...(rung.postConditions || [])]) {
             if (inst.id === instId) {
                 inst.type = newType;
                 if (['GRT','LES','EQU','GEQ','LEQ','NEQ'].includes(newType) && !inst.tag2) inst.tag2 = '';
@@ -588,7 +613,7 @@ function editTimerPreset(instId) {
     const num = parseInt(val);
     if (isNaN(num) || num < 1) { alert('Must be a positive number'); return; }
     for (const rung of EditorPLC.rungs) {
-        for (const inst of [...rung.conditions, ...rung.outputs]) {
+        for (const inst of [...rung.conditions, ...rung.outputs, ...(rung.postConditions || [])]) {
             if (inst.id === instId) { inst.preset = num; break; }
         }
     }
@@ -598,7 +623,7 @@ function editTimerPreset(instId) {
 
 function resetCounter(instId) {
     for (const rung of EditorPLC.rungs) {
-        for (const inst of [...rung.conditions, ...rung.outputs]) {
+        for (const inst of [...rung.conditions, ...rung.outputs, ...(rung.postConditions || [])]) {
             if (inst.id === instId) {
                 const key = inst.id || inst.tag;
                 if (EditorPLC.timerAccs[key]) EditorPLC.timerAccs[key].acc = 0;
@@ -633,6 +658,9 @@ function addInstToBranch(rungIdx, branchIdx) {
 function removeInst(rungIdx, side, instIdx) {
     const rung = EditorPLC.rungs[rungIdx];
     if (side === 'cond') rung.conditions.splice(instIdx, 1);
+    else if (side === 'post') {
+        if (rung.postConditions) rung.postConditions.splice(instIdx, 1);
+    }
     else if (side.startsWith('branch_')) {
         const bi = parseInt(side.split('_')[1]);
         rung.branches[bi].conditions.splice(instIdx, 1);
