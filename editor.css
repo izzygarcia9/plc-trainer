@@ -138,8 +138,8 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .branch-logic { display:flex; flex-direction:row; align-items:stretch; flex-shrink:0; }
 .branch-vertical { width:2px; background:#555; flex-shrink:0; }
 .rung-row.energized .branch-vertical { background:#2ecc71; }
-.branch-rungs { display:flex; flex-direction:column; }
-.branch-rung { display:flex; align-items:center; gap:0; padding:2px 0; }
+.branch-rungs { display:flex; flex-direction:column; flex:1; }
+.branch-rung { display:flex; align-items:center; gap:0; padding:2px 0; flex:1; }
 .short-wire { width:10px; height:2px; background:#555; flex-shrink:0; align-self:center; }
 .rung-row.energized .short-wire { background:#2ecc71; }
 

@@ -437,6 +437,10 @@ function renderRungs() {
                         addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, pi - 1); };
                         pathDiv.appendChild(addBtn);
                     }
+                    // Spacer wire to fill to the right vertical line
+                    const spacer = makeWire(rung.energized);
+                    spacer.classList.add('spacer');
+                    pathDiv.appendChild(spacer);
 
                     br.appendChild(pathDiv);
                 });
