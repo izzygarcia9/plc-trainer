@@ -61,7 +61,7 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .rung-row { display:flex; align-items:stretch; margin-bottom:6px; background:#141620; border:1px solid #2a2d3a; border-radius:4px; min-height:52px; position:relative; }
 .rung-row.energized { border-color:#27ae60; background:#0f1a0f; }
 .rung-num { width:28px; display:flex; align-items:center; justify-content:center; font-size:.6rem; color:#555; border-right:1px solid #2a2d3a; flex-shrink:0; }
-.rung-rail { width:3px; background:#888; flex-shrink:0; }
+.rung-rail { width:4px; background:#aaa; flex-shrink:0; }
 .rung-rail.energized { background:#2ecc71; }
 .rung-outputs { display:flex; align-items:flex-start; gap:2px; padding:4px; border-left:1px dashed #2a2d3a; min-width:100px; flex-wrap:wrap; margin-left:auto; padding-top:8px; }
 .rung-actions { display:flex; flex-direction:column; justify-content:center; gap:2px; padding:2px 4px; border-left:1px solid #2a2d3a; }
@@ -88,7 +88,7 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 
 .inst-extra { font-size:.5rem; color:#666; }
 
-.wire { width:12px; height:2px; background:#888; flex-shrink:0; }
+.wire { width:12px; height:3px; background:#aaa; flex-shrink:0; }
 .wire.energized { background:#2ecc71; }
 .wire.spacer { flex:1 1 auto; width:auto; min-width:20px; }
 
@@ -136,11 +136,11 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 
 /* ─── Branch (PLC Fiddle style) ─── */
 .branch-logic { display:flex; flex-direction:row; align-items:stretch; flex-shrink:0; }
-.branch-vertical { width:2px; background:#888; flex-shrink:0; }
+.branch-vertical { width:3px; background:#aaa; flex-shrink:0; }
 .rung-row.energized .branch-vertical { background:#2ecc71; }
 .branch-rungs { display:flex; flex-direction:column; flex:1; }
 .branch-rung { display:flex; align-items:center; gap:0; padding:2px 0; flex:1; }
-.short-wire { width:10px; height:2px; background:#888; flex-shrink:0; align-self:center; }
+.short-wire { width:10px; height:3px; background:#aaa; flex-shrink:0; align-self:center; }
 .rung-row.energized .short-wire { background:#2ecc71; }
 
 /* Branch add button */
