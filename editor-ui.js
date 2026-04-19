@@ -284,6 +284,17 @@ function setInstField(instId, field, value) {
                 return;
             }
         }
+        // Also search branches
+        if (rung.branches) {
+            for (const branch of rung.branches) {
+                for (const inst of branch.conditions) {
+                    if (inst.id === instId) {
+                        inst[field] = value;
+                        return;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -520,9 +531,18 @@ function changeInstType(instId, newType) {
         for (const inst of [...rung.conditions, ...rung.outputs]) {
             if (inst.id === instId) {
                 inst.type = newType;
-                // Add tag2 for compare types if missing
                 if (['GRT','LES','EQU','GEQ','LEQ','NEQ'].includes(newType) && !inst.tag2) inst.tag2 = '';
                 break;
+            }
+        }
+        if (rung.branches) {
+            for (const branch of rung.branches) {
+                for (const inst of branch.conditions) {
+                    if (inst.id === instId) {
+                        inst.type = newType;
+                        if (['GRT','LES','EQU','GEQ','LEQ','NEQ'].includes(newType) && !inst.tag2) inst.tag2 = '';
+                    }
+                }
             }
         }
     }
