@@ -1,0 +1,73 @@
+/* Workbench styles for learn mode */
+
+.level-badge { background:#f39c12; color:#000; padding:4px 12px; border-radius:12px; font-size:.7rem; font-weight:bold; letter-spacing:1px; }
+
+.learn-banner { background:#111520; border-bottom:1px solid #2a2d3a; padding:10px 20px; display:flex; gap:20px; align-items:center; flex-wrap:wrap; flex-shrink:0; }
+.learn-goal { font-size:.85rem; color:#2ecc71; }
+.learn-goal strong { color:#fff; }
+.learn-hints { font-size:.75rem; color:#888; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.learn-hints strong { color:#7ec8e3; }
+.hint-chip { background:#1a1d29; border:1px solid #2a2d3a; padding:2px 8px; border-radius:12px; font-size:.65rem; }
+
+.learn-workspace { display:flex; flex:1; overflow:hidden; }
+
+/* Workbench panel */
+.workbench { width:280px; background:#0d0f14; border-right:1px solid #2a2d3a; display:flex; flex-direction:column; overflow-y:auto; flex-shrink:0; }
+.workbench h3 { padding:10px 12px; font-size:.85rem; color:#f39c12; border-bottom:1px solid #2a2d3a; background:#141620; }
+
+.wb-scene { display:flex; flex-direction:column; align-items:center; gap:16px; padding:20px 16px; }
+
+/* Devices */
+.wb-device { display:flex; flex-direction:column; align-items:center; gap:4px; }
+
+/* Push Button */
+.wb-pushbutton { width:90px; height:90px; border-radius:50%; border:4px solid #555; background:#222; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-color .1s; user-select:none; }
+.wb-pushbutton:active, .wb-pushbutton.pressed { border-color:#e74c3c; }
+.wb-pb-cap { width:60px; height:60px; border-radius:50%; background:#c0392b; box-shadow:0 4px 8px rgba(0,0,0,.4), inset 0 2px 4px rgba(255,255,255,.1); transition:all .1s; }
+.wb-pushbutton:active .wb-pb-cap, .wb-pushbutton.pressed .wb-pb-cap { transform:scale(.88) translateY(2px); background:#e74c3c; box-shadow:0 1px 3px rgba(0,0,0,.4), 0 0 20px rgba(231,76,60,.5); }
+
+/* Light Bulb */
+.wb-bulb { width:90px; height:90px; border-radius:50%; border:4px solid #333; background:#1a1a1a; display:flex; align-items:center; justify-content:center; position:relative; transition:all .3s; }
+.wb-bulb.on { border-color:#f1c40f; }
+.wb-bulb-glow { position:absolute; inset:-15px; border-radius:50%; background:transparent; transition:all .3s; pointer-events:none; }
+.wb-bulb.on .wb-bulb-glow { background:rgba(241,196,15,.12); box-shadow:0 0 50px rgba(241,196,15,.5); }
+.wb-bulb-icon { font-size:2.5rem; filter:grayscale(1) brightness(.3); transition:filter .3s; z-index:1; }
+.wb-bulb.on .wb-bulb-icon { filter:grayscale(0) brightness(1); }
+
+/* PLC Box */
+.wb-plc { margin:8px 0; }
+.wb-plc-box { background:#1a1d29; border:2px solid #333; border-radius:6px; padding:8px 16px; text-align:center; min-width:80px; }
+.wb-plc-label { font-size:.7rem; font-weight:bold; color:#888; letter-spacing:2px; }
+.wb-plc-led { width:8px; height:8px; border-radius:50%; background:#333; margin:4px auto; transition:all .3s; }
+.wb-plc-led.on { background:#2ecc71; box-shadow:0 0 8px rgba(46,204,113,.5); }
+.wb-plc-text { font-size:.5rem; color:#555; }
+
+/* Wires */
+.wb-wire { width:2px; height:20px; background:#444; transition:background .3s; }
+.wb-wire.live { background:#2ecc71; box-shadow:0 0 4px rgba(46,204,113,.3); }
+
+/* Labels */
+.wb-label { font-size:.75rem; font-weight:bold; color:#ccc; }
+.wb-tag { font-size:.6rem; color:#555; font-family:'Courier New',monospace; }
+
+/* Status */
+.wb-status { padding:12px 16px; border-top:1px solid #2a2d3a; }
+.wb-status-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:.75rem; }
+.wb-status-tag { font-family:'Courier New',monospace; color:#888; }
+.wb-status-val { font-weight:bold; padding:2px 8px; border-radius:4px; font-size:.7rem; }
+.wb-status-val.on { color:#2ecc71; background:rgba(46,204,113,.1); }
+.wb-status-val.off { color:#e74c3c; background:rgba(231,76,60,.05); }
+
+/* Success */
+.wb-success { text-align:center; padding:12px; background:rgba(46,204,113,.1); border:1px solid #27ae60; border-radius:8px; margin:12px 16px; font-size:.85rem; color:#2ecc71; font-weight:bold; animation:celebrate .5s ease; }
+@keyframes celebrate { 0%{transform:scale(.8);opacity:0} 50%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+.hidden { display:none; }
+
+/* Traffic light for Level 2 */
+.wb-traffic-housing { display:flex; flex-direction:column; align-items:center; position:relative; }
+.wb-traffic-light { width:50px; height:50px; border-radius:50%; border:3px solid #333; background:#1a1a1a; margin:2px; transition:all .3s; }
+.wb-traffic-light.red-on { background:#e74c3c; box-shadow:0 0 20px rgba(231,76,60,.6); border-color:#c0392b; }
+.wb-traffic-light.yellow-on { background:#f1c40f; box-shadow:0 0 20px rgba(241,196,15,.6); border-color:#d4ac0d; }
+.wb-traffic-light.green-on { background:#2ecc71; box-shadow:0 0 20px rgba(46,204,113,.6); border-color:#27ae60; }
+.wb-traffic-pole { width:10px; height:30px; background:#444; border-radius:0 0 4px 4px; }
+.wb-traffic-bg { position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:62px; height:calc(100% - 24px); background:#2a2a2a; border:2px solid #444; border-radius:10px; z-index:-1; }

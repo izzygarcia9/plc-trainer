@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ladder Lab — Level 1: Push Button + Light</title>
+    <link rel="stylesheet" href="editor.css">
+    <link rel="stylesheet" href="workbench.css">
+</head>
+<body>
+    <header>
+        <h1>&#9889; Ladder Lab</h1>
+        <div class="header-controls">
+            <button id="run-btn" onclick="toggleRun()">&#9654; RUN</button>
+            <button onclick="singleScan()">&#9193; Scan</button>
+            <span class="scan-label">Scan #<strong id="scan-num">0</strong></span>
+            <span class="scan-label"><strong id="scan-ms">200</strong>ms</span>
+            <input type="range" id="speed-slider" min="50" max="1000" value="200" step="50" oninput="setScanSpeed(this.value)">
+        </div>
+        <div class="level-badge">Level 1</div>
+        <div class="nav-links"><a href="index.html" class="nav-link">&#8592; Hub</a></div>
+    </header>
+
+    <div class="learn-banner">
+        <div class="learn-goal">
+            <strong>&#127919; Goal:</strong> Wire the push button to the light bulb so pressing the button turns on the light.
+        </div>
+        <div class="learn-hints">
+            <strong>&#128161; Hints:</strong>
+            <span class="hint-chip">Use XIC (examine if closed) for the button input</span>
+            <span class="hint-chip">Use OTE (output energize) for the light output</span>
+            <span class="hint-chip">Assign PB_INPUT to the XIC and LIGHT_OUT to the OTE</span>
+        </div>
+    </div>
+
+    <div class="workspace learn-workspace">
+        <!-- Workbench Panel -->
+        <aside id="workbench-panel" class="workbench">
+            <h3>&#128295; Workbench</h3>
+            <div class="wb-scene">
+                <!-- Push Button -->
+                <div class="wb-device">
+                    <div class="wb-pushbutton" id="wb-button"
+                         onmousedown="pressButton()" onmouseup="releaseButton()"
+                         ontouchstart="pressButton()" ontouchend="releaseButton()">
+                        <div class="wb-pb-cap" id="wb-pb-cap"></div>
+                    </div>
+                    <div class="wb-label">PUSH BUTTON</div>
+                    <div class="wb-tag">PB_INPUT</div>
+                    <div class="wb-wire" id="wb-wire-in"></div>
+                </div>
+
+                <!-- PLC Box -->
+                <div class="wb-plc">
+                    <div class="wb-plc-box">
+                        <div class="wb-plc-label">PLC</div>
+                        <div class="wb-plc-led" id="wb-plc-run"></div>
+                        <div class="wb-plc-text">RUN</div>
+                    </div>
+                </div>
+
+                <!-- Light Bulb -->
+                <div class="wb-device">
+                    <div class="wb-bulb" id="wb-bulb">
+                        <div class="wb-bulb-glow" id="wb-bulb-glow"></div>
+                        <div class="wb-bulb-icon">&#128161;</div>
+                    </div>
+                    <div class="wb-label">LIGHT BULB</div>
+                    <div class="wb-tag">LIGHT_OUT</div>
+                    <div class="wb-wire" id="wb-wire-out"></div>
+                </div>
+            </div>
+
+            <!-- Tag Status -->
+            <div class="wb-status">
+                <div class="wb-status-row">
+                    <span class="wb-status-tag">PB_INPUT</span>
+                    <span class="wb-status-val" id="wb-pb-val">OFF</span>
+                </div>
+                <div class="wb-status-row">
+                    <span class="wb-status-tag">LIGHT_OUT</span>
+                    <span class="wb-status-val" id="wb-light-val">OFF</span>
+                </div>
+            </div>
+
+            <!-- Success indicator -->
+            <div class="wb-success hidden" id="wb-success">
+                &#127881; It works! The button controls the light!
+            </div>
+        </aside>
+
+        <!-- Tag Panel (simplified) -->
+        <aside id="tag-panel">
+            <h3>Tags <button class="small-btn" onclick="addTagPrompt()">+ Add</button></h3>
+            <div id="tag-list"></div>
+        </aside>
+
+        <!-- Ladder Editor -->
+        <section id="ladder-editor">
+            <div class="toolbar">
+                <span class="tb-label">Instructions:</span>
+                <button class="inst-btn" onclick="addInst('XIC')" title="Examine If Closed (NO contact)">&#9472;] [&#9472; XIC</button>
+                <button class="inst-btn" onclick="addInst('XIO')" title="Examine If Open (NC contact)">&#9472;]/[&#9472; XIO</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTE')" title="Output Energize (coil)">&#9472;( )&#9472; OTE</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTL')" title="Output Latch">&#9472;(L)&#9472; OTL</button>
+                <button class="inst-btn coil-btn" onclick="addInst('OTU')" title="Output Unlatch">&#9472;(U)&#9472; OTU</button>
+                <span class="tb-sep">|</span>
+                <button class="inst-btn rung-btn" onclick="addRung()">+ Rung</button>
+            </div>
+            <div id="rungs-container"></div>
+        </section>
+    </div>
+
+    <script src="editor-engine.js"></script>
+    <script src="editor-ui.js"></script>
+    <script src="workbench.js"></script>
+</body>
+</html>
