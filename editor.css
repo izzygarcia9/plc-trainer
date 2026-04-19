@@ -135,43 +135,14 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .rung-conditions { display:flex; align-items:flex-start; gap:2px; padding:4px; min-height:44px; flex:1; }
 
 /* Branch group — inline block, top path aligns with main wire, branches drop below */
-.branch-group { display:inline-flex; flex-direction:column; position:relative; flex-shrink:0; }
-
-/* Vertical bus lines on left and right connecting all paths */
-.branch-group::before,
-.branch-group::after {
-    content:'';
-    position:absolute;
-    top:22px;
-    bottom:22px;
-    width:2px;
-    background:#555;
-    z-index:1;
-}
-.branch-group::before { left:0; }
-.branch-group::after { right:0; }
-.rung-row.energized .branch-group::before,
-.rung-row.energized .branch-group::after { background:#2ecc71; }
+.branch-group { display:inline-flex; flex-direction:column; position:relative; flex-shrink:0;
+    border-left:2px solid #555; border-right:2px solid #555;
+    margin:0 2px; }
+.rung-row.energized .branch-group { border-color:#2ecc71; }
 
 /* Each path row inside the branch group */
-.branch-group-path { display:flex; align-items:center; gap:2px; padding:4px 8px; min-height:44px; position:relative; }
-
-/* Horizontal tee stubs connecting each path to the vertical bus */
-.branch-group-path::before,
-.branch-group-path::after {
-    content:'';
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%);
-    width:8px;
-    height:2px;
-    background:#555;
-    z-index:2;
-}
-.branch-group-path::before { left:0; }
-.branch-group-path::after { right:0; }
-.rung-row.energized .branch-group-path::before,
-.rung-row.energized .branch-group-path::after { background:#2ecc71; }
+.branch-group-path { display:flex; align-items:center; gap:2px; padding:4px 6px; min-height:44px; }
+.branch-group-path:not(:first-child) { border-top:none; }
 
 /* Branch add button */
 .branch-add-btn { padding:2px 6px; border:1px dashed #555; background:transparent; color:#888; border-radius:3px; cursor:pointer; font-size:.6rem; flex-shrink:0; margin-left:2px; }
