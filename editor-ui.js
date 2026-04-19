@@ -61,6 +61,11 @@ function deleteTag(name) {
         rung.conditions = rung.conditions.filter(i => i.tag !== name);
         rung.outputs = rung.outputs.filter(i => i.tag !== name);
         if (rung.postConditions) rung.postConditions = rung.postConditions.filter(i => i.tag !== name);
+        if (rung.outputBranches) {
+            for (const branch of rung.outputBranches) {
+                branch.outputs = branch.outputs.filter(i => i.tag !== name);
+            }
+        }
     }
     renderAll();
 }
@@ -291,14 +296,19 @@ function setInstField(instId, field, value) {
                 return;
             }
         }
-        // Also search branches
+        // Search input branches
         if (rung.branches) {
             for (const branch of rung.branches) {
                 for (const inst of branch.conditions) {
-                    if (inst.id === instId) {
-                        inst[field] = value;
-                        return;
-                    }
+                    if (inst.id === instId) { inst[field] = value; return; }
+                }
+            }
+        }
+        // Search output branches
+        if (rung.outputBranches) {
+            for (const branch of rung.outputBranches) {
+                for (const inst of branch.outputs) {
+                    if (inst.id === instId) { inst[field] = value; return; }
                 }
             }
         }
@@ -410,18 +420,65 @@ function renderRungs() {
 
         row.appendChild(condDiv);
 
-        // Outputs
+        // Outputs — may have output branches (parallel outputs)
+        const hasOutputBranches = rung.outputBranches && rung.outputBranches.length > 0;
         const outDiv = document.createElement('div');
         outDiv.className = 'rung-outputs';
         outDiv.ondragover = (e) => { e.preventDefault(); outDiv.style.background = 'rgba(230,126,34,.05)'; };
         outDiv.ondragleave = () => { outDiv.style.background = ''; };
         outDiv.ondrop = (e) => { e.preventDefault(); outDiv.style.background = ''; dropTagOnRung(e, ri, 'out'); };
-        if (rung.outputs.length === 0) {
-            outDiv.innerHTML = '<div class="drop-hint">Drag tag here for output</div>';
+
+        if (hasOutputBranches) {
+            // Render as output branch group (stacked vertically)
+            const outGroup = document.createElement('div');
+            outGroup.className = 'branch-group has-branches';
+
+            // Top path = main outputs
+            const topPath = document.createElement('div');
+            topPath.className = 'branch-group-path';
+            rung.outputs.forEach((inst, ii) => {
+                topPath.appendChild(makeInstBlock(inst, ri, 'out', ii, rung.energized));
+            });
+            if (rung.outputs.length === 0) {
+                topPath.innerHTML = '<div class="drop-hint" style="font-size:.55rem;padding:4px 6px">+ add output</div>';
+            }
+            outGroup.appendChild(topPath);
+
+            // Each output branch below
+            rung.outputBranches.forEach((branch, bi) => {
+                const branchPath = document.createElement('div');
+                branchPath.className = 'branch-group-path';
+                branch.outputs.forEach((inst, ii) => {
+                    branchPath.appendChild(makeInstBlock(inst, ri, 'outbranch_' + bi, ii, rung.energized));
+                });
+                if (branch.outputs.length === 0) {
+                    const hint = document.createElement('div');
+                    hint.className = 'drop-hint';
+                    hint.style.fontSize = '.55rem';
+                    hint.style.padding = '4px 6px';
+                    hint.textContent = '+ add';
+                    hint.style.cursor = 'pointer';
+                    hint.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, bi); };
+                    branchPath.appendChild(hint);
+                }
+                const addBtn = document.createElement('button');
+                addBtn.className = 'branch-add-btn';
+                addBtn.textContent = '+';
+                addBtn.title = 'Add output to this branch';
+                addBtn.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, bi); };
+                branchPath.appendChild(addBtn);
+                outGroup.appendChild(branchPath);
+            });
+
+            outDiv.appendChild(outGroup);
+        } else {
+            if (rung.outputs.length === 0) {
+                outDiv.innerHTML = '<div class="drop-hint">Drag tag here for output</div>';
+            }
+            rung.outputs.forEach((inst, ii) => {
+                outDiv.appendChild(makeInstBlock(inst, ri, 'out', ii, rung.energized));
+            });
         }
-        rung.outputs.forEach((inst, ii) => {
-            outDiv.appendChild(makeInstBlock(inst, ri, 'out', ii, rung.energized));
-        });
         row.appendChild(outDiv);
 
         // Right rail
@@ -567,10 +624,14 @@ function showInstMenu(e, inst, rungIdx, side, instIdx) {
     items += `<div class="ctx-item" onclick="pickTag('${inst.id}','tag')">Change Tag</div>`;
     items += `<div class="ctx-item ctx-danger" onclick="removeInst(${rungIdx},'${side}',${instIdx});closeInstMenu()">Delete</div>`;
 
-    // Branch option (only for conditions)
+    // Branch option (for conditions and outputs)
     if (side === 'cond' || side === 'post') {
         items += `<div class="ctx-sep"></div>`;
-        items += `<div class="ctx-item" onclick="addBranch(${rungIdx})">Add Branch (parallel)</div>`;
+        items += `<div class="ctx-item" onclick="addBranch(${rungIdx})">Add Branch (parallel input)</div>`;
+    }
+    if (side === 'out') {
+        items += `<div class="ctx-sep"></div>`;
+        items += `<div class="ctx-item" onclick="addOutputBranch(${rungIdx})">Add Output Branch (parallel)</div>`;
     }
 
     menu.innerHTML = items;
@@ -599,6 +660,13 @@ function changeInstType(instId, newType) {
                         inst.type = newType;
                         if (['GRT','LES','EQU','GEQ','LEQ','NEQ'].includes(newType) && !inst.tag2) inst.tag2 = '';
                     }
+                }
+            }
+        }
+        if (rung.outputBranches) {
+            for (const branch of rung.outputBranches) {
+                for (const inst of branch.outputs) {
+                    if (inst.id === instId) { inst.type = newType; }
                 }
             }
         }
@@ -646,11 +714,28 @@ function addBranch(rungIdx) {
     renderRungs();
 }
 
+function addOutputBranch(rungIdx) {
+    const rung = EditorPLC.rungs[rungIdx];
+    if (!rung.outputBranches) rung.outputBranches = [];
+    rung.outputBranches.push({ outputs: [] });
+    closeInstMenu();
+    renderRungs();
+}
+
 function addInstToBranch(rungIdx, branchIdx) {
     const rung = EditorPLC.rungs[rungIdx];
     const branch = rung.branches[branchIdx];
     const inst = { type: 'XIC', tag: '', id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
     branch.conditions.push(inst);
+    renderRungs();
+    pickTag(inst.id, 'tag');
+}
+
+function addInstToOutputBranch(rungIdx, branchIdx) {
+    const rung = EditorPLC.rungs[rungIdx];
+    const branch = rung.outputBranches[branchIdx];
+    const inst = { type: 'OTE', tag: '', id: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) };
+    branch.outputs.push(inst);
     renderRungs();
     pickTag(inst.id, 'tag');
 }
@@ -665,6 +750,11 @@ function removeInst(rungIdx, side, instIdx) {
         const bi = parseInt(side.split('_')[1]);
         rung.branches[bi].conditions.splice(instIdx, 1);
         if (rung.branches[bi].conditions.length === 0) rung.branches.splice(bi, 1);
+    }
+    else if (side.startsWith('outbranch_')) {
+        const bi = parseInt(side.split('_')[1]);
+        rung.outputBranches[bi].outputs.splice(instIdx, 1);
+        if (rung.outputBranches[bi].outputs.length === 0) rung.outputBranches.splice(bi, 1);
     }
     else rung.outputs.splice(instIdx, 1);
     renderRungs();

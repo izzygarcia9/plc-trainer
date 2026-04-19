@@ -97,6 +97,14 @@ const EditorPLC = {
         for (const inst of rung.outputs) {
             this.evalOutput(inst, power);
         }
+        // Execute output branches (parallel outputs)
+        if (rung.outputBranches) {
+            for (const branch of rung.outputBranches) {
+                for (const inst of branch.outputs) {
+                    this.evalOutput(inst, power);
+                }
+            }
+        }
     },
 
     evalCondition(inst) {

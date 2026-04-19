@@ -58,12 +58,12 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 
 #rungs-container { flex:1; overflow-y:auto; padding:8px; }
 
-.rung-row { display:flex; align-items:stretch; margin-bottom:6px; background:#141620; border:1px solid #2a2d3a; border-radius:4px; min-height:52px; position:relative; flex-wrap:wrap; }
+.rung-row { display:flex; align-items:stretch; margin-bottom:6px; background:#141620; border:1px solid #2a2d3a; border-radius:4px; min-height:52px; position:relative; }
 .rung-row.energized { border-color:#27ae60; background:#0f1a0f; }
 .rung-num { width:28px; display:flex; align-items:center; justify-content:center; font-size:.6rem; color:#555; border-right:1px solid #2a2d3a; flex-shrink:0; }
 .rung-rail { width:3px; background:#333; flex-shrink:0; }
 .rung-rail.energized { background:#2ecc71; }
-.rung-outputs { display:flex; align-items:center; gap:2px; padding:4px; border-left:1px dashed #2a2d3a; min-width:100px; flex-wrap:wrap; margin-left:auto; }
+.rung-outputs { display:flex; align-items:flex-start; gap:2px; padding:4px; border-left:1px dashed #2a2d3a; min-width:100px; flex-wrap:wrap; margin-left:auto; padding-top:8px; }
 .rung-actions { display:flex; flex-direction:column; justify-content:center; gap:2px; padding:2px 4px; border-left:1px solid #2a2d3a; }
 .rung-actions button { padding:1px 4px; border:1px solid #333; background:transparent; color:#555; border-radius:2px; cursor:pointer; font-size:.6rem; }
 .rung-actions button:hover { color:#e74c3c; border-color:#e74c3c; }
@@ -132,65 +132,44 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .ctx-sep { height:1px; background:#2a2d3a; margin:4px 0; }
 
 /* Rung conditions — horizontal flow of wires, instructions, and branch groups */
-.rung-conditions { display:flex; align-items:center; gap:2px; padding:4px; min-height:44px; flex:1; }
+.rung-conditions { display:flex; align-items:flex-start; gap:2px; padding:4px; min-height:44px; flex:1; }
 
-/* Branch group — inline vertical stack of parallel paths with wire-style connectors */
-.branch-group { display:inline-flex; flex-direction:column; position:relative; flex-shrink:0; padding:0 2px; }
+/* Branch group — inline block, top path aligns with main wire, branches drop below */
+.branch-group { display:inline-flex; flex-direction:column; position:relative; flex-shrink:0; }
 
-/* Left and right vertical wires connecting the paths */
-.branch-group::before {
-    content:'';
-    position:absolute;
-    left:0;
-    top:50%;
-    bottom:0;
-    width:2px;
-    background:#555;
-    z-index:1;
-}
+/* Vertical bus lines on left and right connecting all paths */
+.branch-group::before,
 .branch-group::after {
     content:'';
     position:absolute;
-    right:0;
-    top:50%;
-    bottom:0;
+    top:22px;
+    bottom:22px;
     width:2px;
     background:#555;
     z-index:1;
 }
-/* For multi-path: extend vertical lines from first path center to last path center */
-.branch-group.has-branches::before,
-.branch-group.has-branches::after {
-    top:22px;
-    bottom:22px;
-}
+.branch-group::before { left:0; }
+.branch-group::after { right:0; }
 .rung-row.energized .branch-group::before,
 .rung-row.energized .branch-group::after { background:#2ecc71; }
 
-/* Each path inside the branch group */
-.branch-group-path { display:flex; align-items:center; gap:2px; padding:2px 4px; min-height:44px; position:relative; }
+/* Each path row inside the branch group */
+.branch-group-path { display:flex; align-items:center; gap:2px; padding:4px 8px; min-height:44px; position:relative; }
 
-/* Horizontal tee connectors from vertical line into each path */
-.branch-group-path::before {
-    content:'';
-    position:absolute;
-    left:-2px;
-    top:50%;
-    width:6px;
-    height:2px;
-    background:#555;
-    z-index:2;
-}
+/* Horizontal tee stubs connecting each path to the vertical bus */
+.branch-group-path::before,
 .branch-group-path::after {
     content:'';
     position:absolute;
-    right:-2px;
     top:50%;
-    width:6px;
+    transform:translateY(-50%);
+    width:8px;
     height:2px;
     background:#555;
     z-index:2;
 }
+.branch-group-path::before { left:0; }
+.branch-group-path::after { right:0; }
 .rung-row.energized .branch-group-path::before,
 .rung-row.energized .branch-group-path::after { background:#2ecc71; }
 
