@@ -312,51 +312,78 @@ function renderRungs() {
         // Rung number
         row.innerHTML = `<div class="rung-num">R${ri}</div><div class="rung-rail${rung.energized ? ' energized' : ''}"></div>`;
 
-        // Conditions
-        const condDiv = document.createElement('div');
-        condDiv.className = 'rung-conditions';
-        condDiv.ondragover = (e) => { e.preventDefault(); condDiv.style.background = 'rgba(0,212,255,.05)'; };
-        condDiv.ondragleave = () => { condDiv.style.background = ''; };
-        condDiv.ondrop = (e) => { e.preventDefault(); condDiv.style.background = ''; dropTagOnRung(e, ri, 'cond'); };
-        if (rung.conditions.length === 0) {
-            condDiv.innerHTML = '<div class="drop-hint">Drag a tag here or click instruction above</div>';
-        }
-        rung.conditions.forEach((inst, ii) => {
-            if (ii > 0) condDiv.appendChild(makeWire(rung.energized));
-            condDiv.appendChild(makeInstBlock(inst, ri, 'cond', ii, rung.energized));
-        });
-        row.appendChild(condDiv);
+        // Rung body — contains main path + branch paths stacked vertically
+        const rungBody = document.createElement('div');
+        rungBody.className = 'rung-body';
 
-        // Render branches (parallel paths)
+        // Main condition path
+        const mainPath = document.createElement('div');
+        mainPath.className = 'rung-path main-path';
+        mainPath.ondragover = (e) => { e.preventDefault(); mainPath.style.background = 'rgba(0,212,255,.05)'; };
+        mainPath.ondragleave = () => { mainPath.style.background = ''; };
+        mainPath.ondrop = (e) => { e.preventDefault(); mainPath.style.background = ''; dropTagOnRung(e, ri, 'cond'); };
+
+        if (rung.conditions.length === 0 && (!rung.branches || rung.branches.length === 0)) {
+            mainPath.innerHTML = '<div class="drop-hint">Drag a tag here or click instruction above</div>';
+        }
+        // Leading wire
+        mainPath.appendChild(makeWire(rung.energized));
+        rung.conditions.forEach((inst, ii) => {
+            mainPath.appendChild(makeInstBlock(inst, ri, 'cond', ii, rung.energized));
+            mainPath.appendChild(makeWire(rung.energized));
+        });
+        // Stretching wire at end of main path
+        const mainStretch = makeWire(rung.energized);
+        mainStretch.classList.add('spacer');
+        mainPath.appendChild(mainStretch);
+
+        rungBody.appendChild(mainPath);
+
+        // Branch paths (parallel OR paths below main) — wrapped in a div with vertical connectors
         if (rung.branches && rung.branches.length > 0) {
-            const branchContainer = document.createElement('div');
-            branchContainer.className = 'branch-container';
             rung.branches.forEach((branch, bi) => {
-                const branchDiv = document.createElement('div');
-                branchDiv.className = 'branch-path';
+                const branchWrap = document.createElement('div');
+                branchWrap.className = 'branch-wrapper';
+
+                const branchPath = document.createElement('div');
+                branchPath.className = 'rung-path branch-path';
+
+                // Leading wire
+                branchPath.appendChild(makeWire(rung.energized));
+
                 branch.conditions.forEach((inst, ii) => {
-                    if (ii > 0) branchDiv.appendChild(makeWire(rung.energized));
-                    branchDiv.appendChild(makeInstBlock(inst, ri, 'branch_' + bi, ii, rung.energized));
+                    branchPath.appendChild(makeInstBlock(inst, ri, 'branch_' + bi, ii, rung.energized));
+                    branchPath.appendChild(makeWire(rung.energized));
                 });
+
                 if (branch.conditions.length === 0) {
-                    branchDiv.innerHTML = '<div class="drop-hint" style="font-size:.55rem">Click instruction to add to branch</div>';
+                    const hint = document.createElement('div');
+                    hint.className = 'drop-hint';
+                    hint.style.fontSize = '.55rem';
+                    hint.style.padding = '4px 8px';
+                    hint.textContent = 'click + to add';
+                    branchPath.appendChild(hint);
                 }
-                // Add instruction to branch button
+
+                // Add instruction button
                 const addBtn = document.createElement('button');
                 addBtn.className = 'branch-add-btn';
                 addBtn.textContent = '+';
                 addBtn.title = 'Add instruction to this branch';
                 addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, bi); };
-                branchDiv.appendChild(addBtn);
-                branchContainer.appendChild(branchDiv);
+                branchPath.appendChild(addBtn);
+
+                // Stretching wire
+                const branchStretch = makeWire(rung.energized);
+                branchStretch.classList.add('spacer');
+                branchPath.appendChild(branchStretch);
+
+                branchWrap.appendChild(branchPath);
+                rungBody.appendChild(branchWrap);
             });
-            row.appendChild(branchContainer);
         }
 
-        // Wire between conditions and outputs (stretches to fill gap)
-        const midWire = makeWire(rung.energized);
-        midWire.classList.add('spacer');
-        row.appendChild(midWire);
+        row.appendChild(rungBody);
 
         // Outputs
         const outDiv = document.createElement('div');
@@ -413,17 +440,21 @@ function makeInstBlock(inst, rungIdx, side, instIdx, energized) {
     if (['GRT', 'LES', 'EQU', 'GEQ', 'LEQ', 'NEQ'].includes(inst.type)) {
         const ops = {GRT:'>',LES:'<',EQU:'=',GEQ:'>=',LEQ:'<=',NEQ:'≠'};
         const op = ops[inst.type] || '?';
-        extraHtml = `<div class="inst-extra">${op} <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${inst.tag2 || '???'}</span></div>`;
+        const dispTag2 = inst.tag2 ? (inst.tag2.startsWith('_CONST_') ? inst.tag2.replace('_CONST_','') : inst.tag2) : '???';
+        extraHtml = `<div class="inst-extra">${op} <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${dispTag2}</span></div>`;
     }
     if (['ADD', 'SUB', 'MUL', 'DIV'].includes(inst.type)) {
+        const dispTag2 = inst.tag2 ? (inst.tag2.startsWith('_CONST_') ? inst.tag2.replace('_CONST_','') : inst.tag2) : 'src1';
+        const dispTag3 = inst.tag3 ? (inst.tag3.startsWith('_CONST_') ? inst.tag3.replace('_CONST_','') : inst.tag3) : 'src2';
         extraHtml = `<div class="inst-extra">
-            <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${inst.tag2 || 'src1'}</span>
+            <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${dispTag2}</span>
             ${inst.type === 'ADD' ? '+' : inst.type === 'SUB' ? '-' : inst.type === 'MUL' ? '*' : '/'}
-            <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag3')">${inst.tag3 || 'src2'}</span>
+            <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag3')">${dispTag3}</span>
         </div>`;
     }
     if (inst.type === 'MOV') {
-        extraHtml = `<div class="inst-extra">from <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${inst.tag2 || 'src'}</span></div>`;
+        const dispTag2 = inst.tag2 ? (inst.tag2.startsWith('_CONST_') ? inst.tag2.replace('_CONST_','') : inst.tag2) : 'src';
+        extraHtml = `<div class="inst-extra">from <span class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag2')">${dispTag2}</span></div>`;
     }
     if (inst.type === 'TON') {
         const en = EditorPLC.getTag(inst.tag + '_EN');
@@ -450,9 +481,10 @@ function makeInstBlock(inst, rungIdx, side, instIdx, energized) {
         </div>`;
     }
 
+    const displayTag = inst.tag ? (inst.tag.startsWith('_CONST_') ? inst.tag.replace('_CONST_','') : inst.tag) : '???';
     div.innerHTML = `
         <div class="inst-type">${symbol}</div>
-        <div class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag')">${inst.tag || '???'}</div>
+        <div class="inst-tag" onclick="event.stopPropagation();pickTag('${inst.id}','tag')">${displayTag}</div>
         ${extraHtml}
         <div class="inst-del" onclick="event.stopPropagation();removeInst(${rungIdx},'${side}',${instIdx})">&times;</div>
     `;
