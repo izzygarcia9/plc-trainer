@@ -135,14 +135,11 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .rung-conditions { display:flex; align-items:center; gap:0; padding:4px; min-height:44px; flex:1; }
 
 /* ─── Branch (PLC Fiddle style) ─── */
-/* branch-logic is a horizontal flex: wire | vert-line | stacked-paths | vert-line | wire */
-.branch-logic { display:inline-flex; flex-direction:row; align-items:stretch; flex-shrink:0; }
-.branch-vertical { width:2px; background:#555; flex-shrink:0; align-self:stretch; }
+.branch-logic { display:flex; flex-direction:row; align-items:stretch; flex-shrink:0; }
+.branch-vertical { width:2px; background:#555; flex-shrink:0; }
 .rung-row.energized .branch-vertical { background:#2ecc71; }
 .branch-rungs { display:flex; flex-direction:column; }
-/* Each path inside the branch */
-.branch-rung { display:flex; align-items:center; gap:0; min-height:44px; padding:2px 0; }
-/* Short wires at branch entry/exit */
+.branch-rung { display:flex; align-items:center; gap:0; padding:2px 0; }
 .short-wire { width:10px; height:2px; background:#555; flex-shrink:0; align-self:center; }
 .rung-row.energized .short-wire { background:#2ecc71; }
 

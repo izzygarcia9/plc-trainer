@@ -400,7 +400,10 @@ function renderRungs() {
 
                 // Left vertical line
                 const vL = document.createElement('div');
-                vL.className = 'branch-vertical' + (rung.energized ? ' energized' : '');
+                vL.className = 'branch-vertical';
+                const pathCount = 1 + rung.branches.length;
+                const vHeight = pathCount * 48;
+                vL.style.height = vHeight + 'px';
                 bl.appendChild(vL);
 
                 // Stacked paths
@@ -442,7 +445,8 @@ function renderRungs() {
 
                 // Right vertical line
                 const vR = document.createElement('div');
-                vR.className = 'branch-vertical' + (rung.energized ? ' energized' : '');
+                vR.className = 'branch-vertical';
+                vR.style.height = vHeight + 'px';
                 bl.appendChild(vR);
 
                 // Right short wire out of branch
