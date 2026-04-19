@@ -82,6 +82,7 @@
                 <button class="inst-btn math-btn" onclick="addInst('TON')">TON</button>
                 <span class="tb-sep">|</span>
                 <button class="inst-btn rung-btn" onclick="addRung()">+ Rung</button>
+                <button class="inst-btn" onclick="addBranch(selectedRungIdx)" title="Add parallel branch">&#9547; Branch</button>
             </div>
             <div id="rungs-container"></div>
         </section>
@@ -89,7 +90,8 @@
     <script src="editor-engine.js"></script>
     <script src="editor-ui.js"></script>
     <script>
-    // Level 3 init
+    // Level 3 init — clear listeners to avoid conflict
+    EditorPLC.listeners=[];
     EditorPLC.tags={};EditorPLC.rungs=[];EditorPLC.scanCount=0;EditorPLC.timerAccs={};
     EditorPLC.defineTag('GREEN','BOOL',true);
     EditorPLC.defineTag('YELLOW','BOOL',false);
