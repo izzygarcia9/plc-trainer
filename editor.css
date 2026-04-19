@@ -134,15 +134,14 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 /* Rung conditions — horizontal flow of wires, instructions, and branch groups */
 .rung-conditions { display:flex; align-items:flex-start; gap:2px; padding:4px; min-height:44px; flex:1; }
 
-/* Branch group — inline block, top path aligns with main wire, branches drop below */
-.branch-group { display:inline-flex; flex-direction:column; position:relative; flex-shrink:0;
+/* Branch group — inline block, only as wide as its content */
+.branch-group { display:inline-flex; flex-direction:column; flex-shrink:0; flex-grow:0;
     border-left:2px solid #555; border-right:2px solid #555;
-    margin:0 2px; }
+    margin:0 2px; width:fit-content; }
 .rung-row.energized .branch-group { border-color:#2ecc71; }
 
 /* Each path row inside the branch group */
-.branch-group-path { display:flex; align-items:center; gap:2px; padding:4px 6px; min-height:44px; }
-.branch-group-path:not(:first-child) { border-top:none; }
+.branch-group-path { display:flex; align-items:center; gap:2px; padding:4px 6px; min-height:44px; width:fit-content; }
 
 /* Branch add button */
 .branch-add-btn { padding:2px 6px; border:1px dashed #555; background:transparent; color:#888; border-radius:3px; cursor:pointer; font-size:.6rem; flex-shrink:0; margin-left:2px; }
