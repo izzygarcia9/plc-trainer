@@ -138,32 +138,11 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 /* Each path row (main or branch) */
 .rung-path { display:flex; align-items:center; gap:2px; padding:2px 4px; min-height:44px; position:relative; }
 .main-path { }
-.branch-path { margin-left:8px; margin-right:8px; }
+.branch-path { padding-left:12px; padding-right:12px; }
 
-/* Vertical connector lines — drawn as pseudo-elements on the branch wrapper */
-.branch-wrapper { position:relative; }
-.branch-wrapper::before {
-    content:'';
-    position:absolute;
-    left:8px;
-    top:-22px;
-    width:2px;
-    height:calc(100% + 22px);
-    background:#f39c12;
-    z-index:1;
-}
-.branch-wrapper::after {
-    content:'';
-    position:absolute;
-    right:8px;
-    top:-22px;
-    width:2px;
-    height:calc(100% + 22px);
-    background:#f39c12;
-    z-index:1;
-}
-.rung-row.energized .branch-wrapper::before,
-.rung-row.energized .branch-wrapper::after { background:#2ecc71; }
+/* Branch wrapper — draws vertical connector lines on left and right */
+.branch-wrapper { position:relative; margin-left:4px; margin-right:4px; border-left:2px solid #f39c12; border-right:2px solid #f39c12; border-bottom:2px solid #f39c12; border-radius:0 0 4px 4px; }
+.rung-row.energized .branch-wrapper { border-color:#2ecc71; }
 
 /* Branch add button */
 .branch-add-btn { padding:3px 8px; border:1px dashed #f39c12; background:transparent; color:#f39c12; border-radius:3px; cursor:pointer; font-size:.65rem; flex-shrink:0; }
