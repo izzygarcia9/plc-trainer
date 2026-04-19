@@ -74,12 +74,12 @@
         <section id="ladder-editor">
             <div class="toolbar">
                 <span class="tb-label">Instructions:</span>
-                <button class="inst-btn" onclick="addInst('XIC')">&#9472;] [&#9472; XIC</button>
-                <button class="inst-btn" onclick="addInst('XIO')">&#9472;]/[&#9472; XIO</button>
-                <button class="inst-btn coil-btn" onclick="addInst('OTE')">&#9472;( )&#9472; OTE</button>
-                <button class="inst-btn coil-btn" onclick="addInst('OTL')">&#9472;(L)&#9472; OTL</button>
-                <button class="inst-btn coil-btn" onclick="addInst('OTU')">&#9472;(U)&#9472; OTU</button>
-                <button class="inst-btn math-btn" onclick="addInst('TON')">TON</button>
+                <button class="inst-btn" draggable="true" data-inst="XIC" onclick="addInst('XIC')">&#9472;] [&#9472; XIC</button>
+                <button class="inst-btn" draggable="true" data-inst="XIO" onclick="addInst('XIO')">&#9472;]/[&#9472; XIO</button>
+                <button class="inst-btn coil-btn" draggable="true" data-inst="OTE" onclick="addInst('OTE')">&#9472;( )&#9472; OTE</button>
+                <button class="inst-btn coil-btn" draggable="true" data-inst="OTL" onclick="addInst('OTL')">&#9472;(L)&#9472; OTL</button>
+                <button class="inst-btn coil-btn" draggable="true" data-inst="OTU" onclick="addInst('OTU')">&#9472;(U)&#9472; OTU</button>
+                <button class="inst-btn math-btn" draggable="true" data-inst="TON" onclick="addInst('TON')">TON</button>
                 <span class="tb-sep">|</span>
                 <button class="inst-btn rung-btn" onclick="addRung()">+ Rung</button>
                 <button class="inst-btn" onclick="addBranch(selectedRungIdx)" title="Add parallel branch">&#9547; Branch</button>
