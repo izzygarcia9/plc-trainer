@@ -389,66 +389,68 @@ function renderRungs() {
             condDiv.appendChild(makeWire(rung.energized));
 
             if (hasBranches) {
-                // Build branch group as a table with vertical wires
-                const branchGroup = document.createElement('div');
-                branchGroup.className = 'branch-group';
+                // PLC Fiddle style: short-wire | branch-vertical | branch-rungs | branch-vertical | short-wire
+                const bl = document.createElement('div');
+                bl.className = 'branch-logic';
+
+                // Left short wire into branch
+                const swL = document.createElement('div');
+                swL.className = 'short-wire' + (rung.energized ? ' energized' : '');
+                bl.appendChild(swL);
+
+                // Left vertical line
+                const vL = document.createElement('div');
+                vL.className = 'branch-vertical' + (rung.energized ? ' energized' : '');
+                bl.appendChild(vL);
+
+                // Stacked paths
+                const br = document.createElement('div');
+                br.className = 'branch-rungs';
 
                 const allPaths = [rung.conditions, ...rung.branches.map(b => b.conditions)];
                 const pathSides = ['cond', ...rung.branches.map((_, bi) => 'branch_' + bi)];
 
                 allPaths.forEach((pathInsts, pi) => {
-                    const pathRow = document.createElement('div');
-                    pathRow.className = 'branch-row';
+                    const pathDiv = document.createElement('div');
+                    pathDiv.className = 'branch-rung';
 
-                    // Left vertical wire
-                    const vLeft = document.createElement('div');
-                    vLeft.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
-                    if (pi === 0) vLeft.classList.add('vwire-top');
-                    else if (pi === allPaths.length - 1) vLeft.classList.add('vwire-bottom');
-                    else vLeft.classList.add('vwire-mid');
-                    pathRow.appendChild(vLeft);
-
-                    // Horizontal path cell
-                    const hCell = document.createElement('div');
-                    hCell.className = 'branch-hpath';
-                    const hInner = document.createElement('div');
-                    hInner.className = 'branch-hpath-inner';
+                    pathDiv.appendChild(makeWire(rung.energized));
                     pathInsts.forEach((inst, ii) => {
-                        hInner.appendChild(makeWire(rung.energized));
-                        hInner.appendChild(makeInstBlock(inst, ri, pathSides[pi], ii, rung.energized));
+                        pathDiv.appendChild(makeInstBlock(inst, ri, pathSides[pi], ii, rung.energized));
+                        pathDiv.appendChild(makeWire(rung.energized));
                     });
-                    hInner.appendChild(makeWire(rung.energized));
                     if (pathInsts.length === 0 && pi > 0) {
                         const hint = document.createElement('div');
                         hint.className = 'drop-hint';
                         hint.style.cssText = 'font-size:.55rem;padding:4px 6px;cursor:pointer';
                         hint.textContent = '+ add';
                         hint.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, pi - 1); };
-                        hInner.appendChild(hint);
+                        pathDiv.appendChild(hint);
                     }
                     if (pi > 0) {
                         const addBtn = document.createElement('button');
                         addBtn.className = 'branch-add-btn';
                         addBtn.textContent = '+';
                         addBtn.onclick = (e) => { e.stopPropagation(); addInstToBranch(ri, pi - 1); };
-                        hInner.appendChild(addBtn);
+                        pathDiv.appendChild(addBtn);
                     }
-                    hCell.appendChild(hInner);
-                    pathRow.appendChild(hCell);
 
-                    // Right vertical wire
-                    const vRight = document.createElement('div');
-                    vRight.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
-                    if (pi === 0) vRight.classList.add('vwire-top');
-                    else if (pi === allPaths.length - 1) vRight.classList.add('vwire-bottom');
-                    else vRight.classList.add('vwire-mid');
-                    pathRow.appendChild(vRight);
-
-                    branchGroup.appendChild(pathRow);
+                    br.appendChild(pathDiv);
                 });
 
-                condDiv.appendChild(branchGroup);
-                condDiv.appendChild(makeWire(rung.energized));
+                bl.appendChild(br);
+
+                // Right vertical line
+                const vR = document.createElement('div');
+                vR.className = 'branch-vertical' + (rung.energized ? ' energized' : '');
+                bl.appendChild(vR);
+
+                // Right short wire out of branch
+                const swR = document.createElement('div');
+                swR.className = 'short-wire' + (rung.energized ? ' energized' : '');
+                bl.appendChild(swR);
+
+                condDiv.appendChild(bl);
 
                 // Post-branch conditions (in series after the branch group)
                 if (rung.postConditions && rung.postConditions.length > 0) {
@@ -482,29 +484,28 @@ function renderRungs() {
         outDiv.ondrop = (e) => { e.preventDefault(); outDiv.style.background = ''; dropTagOnRung(e, ri, 'out'); };
 
         if (hasOutputBranches) {
-            const outGroup = document.createElement('div');
-            outGroup.className = 'branch-group';
+            const bl = document.createElement('div');
+            bl.className = 'branch-logic';
+
+            const swL = document.createElement('div');
+            swL.className = 'short-wire' + (rung.energized ? ' energized' : '');
+            bl.appendChild(swL);
+
+            const vL = document.createElement('div');
+            vL.className = 'branch-vertical' + (rung.energized ? ' energized' : '');
+            bl.appendChild(vL);
+
+            const br = document.createElement('div');
+            br.className = 'branch-rungs';
 
             const allOutPaths = [rung.outputs, ...rung.outputBranches.map(b => b.outputs)];
             const outSides = ['out', ...rung.outputBranches.map((_, bi) => 'outbranch_' + bi)];
 
             allOutPaths.forEach((pathInsts, pi) => {
-                const pathRow = document.createElement('div');
-                pathRow.className = 'branch-row';
-
-                const vLeft = document.createElement('div');
-                vLeft.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
-                if (pi === 0) vLeft.classList.add('vwire-top');
-                else if (pi === allOutPaths.length - 1) vLeft.classList.add('vwire-bottom');
-                else vLeft.classList.add('vwire-mid');
-                pathRow.appendChild(vLeft);
-
-                const hCell = document.createElement('div');
-                hCell.className = 'branch-hpath';
-                const hInner = document.createElement('div');
-                hInner.className = 'branch-hpath-inner';
+                const pathDiv = document.createElement('div');
+                pathDiv.className = 'branch-rung';
                 pathInsts.forEach((inst, ii) => {
-                    hInner.appendChild(makeInstBlock(inst, ri, outSides[pi], ii, rung.energized));
+                    pathDiv.appendChild(makeInstBlock(inst, ri, outSides[pi], ii, rung.energized));
                 });
                 if (pathInsts.length === 0 && pi > 0) {
                     const hint = document.createElement('div');
@@ -512,29 +513,29 @@ function renderRungs() {
                     hint.style.cssText = 'font-size:.55rem;padding:4px 6px;cursor:pointer';
                     hint.textContent = '+ add';
                     hint.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, pi - 1); };
-                    hInner.appendChild(hint);
+                    pathDiv.appendChild(hint);
                 }
                 if (pi > 0) {
                     const addBtn = document.createElement('button');
                     addBtn.className = 'branch-add-btn';
                     addBtn.textContent = '+';
                     addBtn.onclick = (e) => { e.stopPropagation(); addInstToOutputBranch(ri, pi - 1); };
-                    hInner.appendChild(addBtn);
+                    pathDiv.appendChild(addBtn);
                 }
-                hCell.appendChild(hInner);
-                pathRow.appendChild(hCell);
-
-                const vRight = document.createElement('div');
-                vRight.className = 'branch-vwire' + (rung.energized ? ' energized' : '');
-                if (pi === 0) vRight.classList.add('vwire-top');
-                else if (pi === allOutPaths.length - 1) vRight.classList.add('vwire-bottom');
-                else vRight.classList.add('vwire-mid');
-                pathRow.appendChild(vRight);
-
-                outGroup.appendChild(pathRow);
+                br.appendChild(pathDiv);
             });
 
-            outDiv.appendChild(outGroup);
+            bl.appendChild(br);
+
+            const vR = document.createElement('div');
+            vR.className = 'branch-vertical' + (rung.energized ? ' energized' : '');
+            bl.appendChild(vR);
+
+            const swR = document.createElement('div');
+            swR.className = 'short-wire' + (rung.energized ? ' energized' : '');
+            bl.appendChild(swR);
+
+            outDiv.appendChild(bl);
         } else {
             if (rung.outputs.length === 0) {
                 outDiv.innerHTML = '<div class="drop-hint">Drag tag here for output</div>';
@@ -876,8 +877,8 @@ function lightUpdate() {
         row.querySelectorAll('.rung-rail').forEach(r => { if (rung.energized) r.classList.add('energized'); else r.classList.remove('energized'); });
         // Update wires
         row.querySelectorAll('.wire').forEach(w => { if (rung.energized) w.classList.add('energized'); else w.classList.remove('energized'); });
-        // Update branch vertical wires
-        row.querySelectorAll('.branch-vwire').forEach(v => { if (rung.energized) v.classList.add('energized'); else v.classList.remove('energized'); });
+        // Update branch wires
+        row.querySelectorAll('.branch-vertical,.short-wire').forEach(v => { if (rung.energized) v.classList.add('energized'); else v.classList.remove('energized'); });
         // Update instruction blocks
         row.querySelectorAll('.inst-block').forEach(ib => { if (rung.energized) ib.classList.add('energized'); else ib.classList.remove('energized'); });
     });

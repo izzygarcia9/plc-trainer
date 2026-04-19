@@ -132,27 +132,19 @@ header h1 { font-size:1.2rem; color:#00d4ff; }
 .ctx-sep { height:1px; background:#2a2d3a; margin:4px 0; }
 
 /* Rung conditions — horizontal flow */
-.rung-conditions { display:flex; align-items:flex-start; gap:2px; padding:4px; min-height:44px; flex:1; }
+.rung-conditions { display:flex; align-items:center; gap:0; padding:4px; min-height:44px; flex:1; }
 
-/* ─── Branch rendering (PLC Fiddle / Studio 5000 style) ─── */
-/* The branch-group is a table: each row is a parallel path.
-   Vertical wires on left/right connect the rows. */
-.branch-group { display:inline-table; border-collapse:collapse; flex-shrink:0; vertical-align:top; }
-.branch-row { display:table-row; }
-.branch-vwire { display:table-cell; width:2px; position:relative; vertical-align:middle; }
-/* Draw the vertical wire as a pseudo-element so it spans correctly */
-.branch-vwire::after { content:''; position:absolute; left:0; width:2px; background:#555; }
-/* Middle rows: full height vertical wire */
-.branch-vwire.vwire-mid::after { top:0; bottom:0; }
-/* Top row: wire from center down */
-.branch-vwire.vwire-top::after { top:50%; bottom:0; }
-/* Bottom row: wire from top to center */
-.branch-vwire.vwire-bottom::after { top:0; height:50%; }
-/* Energized colors */
-.branch-vwire.energized::after { background:#2ecc71; }
-
-.branch-hpath { display:table-cell; vertical-align:middle; white-space:nowrap; padding:4px 2px; }
-.branch-hpath-inner { display:flex; align-items:center; gap:2px; min-height:40px; }
+/* ─── Branch (PLC Fiddle style) ─── */
+/* branch-logic is a horizontal flex: wire | vert-line | stacked-paths | vert-line | wire */
+.branch-logic { display:inline-flex; flex-direction:row; align-items:stretch; flex-shrink:0; }
+.branch-vertical { width:2px; background:#555; flex-shrink:0; align-self:stretch; }
+.rung-row.energized .branch-vertical { background:#2ecc71; }
+.branch-rungs { display:flex; flex-direction:column; }
+/* Each path inside the branch */
+.branch-rung { display:flex; align-items:center; gap:0; min-height:44px; padding:2px 0; }
+/* Short wires at branch entry/exit */
+.short-wire { width:10px; height:2px; background:#555; flex-shrink:0; align-self:center; }
+.rung-row.energized .short-wire { background:#2ecc71; }
 
 /* Branch add button */
 .branch-add-btn { padding:2px 6px; border:1px dashed #555; background:transparent; color:#888; border-radius:3px; cursor:pointer; font-size:.6rem; flex-shrink:0; margin-left:2px; }
